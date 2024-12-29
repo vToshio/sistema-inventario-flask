@@ -7,6 +7,20 @@
 </head>
 <body>
     <main>
+        {% if messages %}
+        <section id="messages-panel">
+            <ul>
+            {% for cat, msg in messages %}
+                {% if cat == 'error' %}
+                <li class="error">{{ msg }}</li>
+                {% else %}
+                <li class="success">{{ msg }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
         <section>
             <h1>Login</h1>
             <form method="POST" action="{{ next or url_for('val.login_validation') }}">
