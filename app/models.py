@@ -5,10 +5,10 @@ db = SQLAlchemy()
 
 class User(db.Model):
     '''
-    Model that defines each user on the 'users' table on database.
+    Model que define cada usuário do sistema na tabela 'users'.
 
-    Atributes:
-    - id (int)
+    Atributos:
+    - [*PK] id (int)
     - role (string[6])
     - name (string[30])
     - username (string[20])
@@ -32,11 +32,14 @@ class User(db.Model):
 
 class Product(db.Model):
     '''
-    Model that defines the 'products' table.
+    Model que define cada registro de produto na tabela 'products'.
 
-    Atributes:
-    -
-
+    Atributos:
+    - [*PK] id (int)
+    - desc (string[100])
+    - quantity (int)
+    - price (float[10,2])
+    - category (string[30])
     '''
     __tablename__ = 'products'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
@@ -52,6 +55,15 @@ class Product(db.Model):
         return f'<Product: {self.id}>'
 
 class Customer(db.Model):
+    '''
+    Model que registra cada cliente do negócio em uma tabela 'customers'.
+
+    Atributos:
+    - [*PK] id (int)
+    - name (string[30])
+    - email (string[50])
+    - address (string[100])
+    '''
     __tablename__ = 'customers'   
     id = db.Column('id', db.Integer(), primary_key=True, nullable=False)
     name = db.Column('name', db.String(30), nullable=False) 
@@ -64,9 +76,17 @@ class Customer(db.Model):
         return f'<Customer: {self.name}/{self.id}>'
 
 class Provider(db.Model):
+    '''
+    Model que registra cada fornecedor do negócio em um tabela 'providers'.
+
+    Atributos:
+    - [*PK] id (int)
+    - name (string[50])
+    - address (string[100])
+    '''
     __tablename__ = 'providers'
-    provider_id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
-    name = db.Column('name', db.String(100), nullable=False)
+    id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
+    name = db.Column('name', db.String(50), nullable=False)
     address = db.Column('address', db.String(100), nullable=False)
 
     orders = db.relationship('Order', back_populates='provider', foreign_keys='Order.provider_id')
@@ -75,6 +95,18 @@ class Provider(db.Model):
         return f'<Provider: {self.name}>'
 
 class Sale(db.Model):
+    '''
+    Model que registra cada venda em uma tabela 'sales'.
+    Cada venda está relacionada à um user e à um cliente, e à uma quantidade n de produtos.
+
+    Atributos:
+    - [*PK] id (int)
+    - total (float[10,2])
+    - sell_date (date)
+    - discount (int)
+    - [FK] salesman_id (int)
+    - [FK] customer_id (int)
+    '''
     __tablename__ = 'sales'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     total = db.Column('total', db.Numeric(precision=10, scale=2), nullable=False)
@@ -93,6 +125,17 @@ class Sale(db.Model):
 
 
 class Order(db.Model):
+    '''
+    Model que registra cada pedido de produtos para um fornecedor na tabela 'orders'. 
+    Cada pedido está associado a um fornecedor e a um usuário, e à uma quantidade n de produtos.
+    
+    Atributos:
+    - [*PK] id (int)
+    - order_date (date)
+    - total (float[10,2])
+    - [FK] salesman_id (int)
+    - [FK] provider_id (int)
+    '''
     __tablename__ = 'orders'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     order_date = db.Column('order_date', db.Date(), default=datetime.now(), nullable=False)
@@ -109,6 +152,16 @@ class Order(db.Model):
     
    
 class SaleProducts(db.Model):
+    '''
+    Model que define uma tabela associativa entre as tabelas 'sales' e 'products'.
+    Faz uma relação de uma venda à uma série de produtos.
+
+    Atributos:
+    - [*PK] id (int)
+    - [FK] sale_id (int)
+    - [FK] product_it (int)
+    - quantity (int)
+    '''
     __tablename__ = 'sale_products'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     sale_id = db.Column('sale_id', db.Integer(), db.ForeignKey('sales.id'), nullable=False)
@@ -123,6 +176,16 @@ class SaleProducts(db.Model):
 
    
 class OrderProducts(db.Model):
+    '''
+    Model que define uma tabela associativa entre as tabelas 'orders' e 'products'.
+    Faz a relação de um pedido à uma série de produtos.
+
+    Atributos:
+    - [*PK] id (int)
+    - [FK] order_id (int)
+    - [FK] product_id (int)
+    - quantity (int)
+    '''
     __tablename__ = 'order_products'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     order_id = db.Column('order_id', db.Integer(), db.ForeignKey('orders.id'), nullable=False)
