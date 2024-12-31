@@ -7,16 +7,39 @@
     <title>{{ pagetitle }}</title>
 </head>
 <body>
-    <head>
-        <form action="{{ url_for('views.logout') }}" method="POST">
-            <button type="submit">Sair</button>
-        </form>
-    </head>
-    <main>
-        {% block content %} {% endblock %}
-    </main>
-    <body>
+    <main class="main-container d-flex">
+        <section class="sidebar" id="side_nav">
+            <div>
+                <!-- Header Logo -->
+            </div>
         
-    </body>
+            <ul>
+                <!-- Divisoria 1 -->
+                <li><a href="{{ url_for('views.vendas') }}">Vendas</a></li>
+                <li><a href="{{ url_for('views.estoque') }}">Estoque</a></li>
+                <li><a href="{{ url_for('views.compras') }}">Compras</a></li>
+            </ul>
+            
+            <hr>
+            
+            <ul>
+                <!-- Divisoria 2 -->
+                {% if session['user_role'] in ['master', 'admin'] %}
+                <li><a href="">Usuários</a></li>
+                {% endif %}
+                <form action="{{ url_for('views.logout') }}" method="POST">
+                    <li><button type="submit">Sair</button></li>
+                </form>
+            </ul>
+
+        </section>
+    
+        
+        <section class="content">
+            {% block content %} {% endblock %}
+        </section>
+    </main>
+    
+
 </body>
 </html>

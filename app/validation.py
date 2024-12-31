@@ -15,6 +15,7 @@ def login_validation():
     if found_user:
         if bcrypt.check_password_hash(found_user.password, passwd):
             session['logged_user'] = username
+            session['user_role'] = found_user.role
             return redirect(url_for('views.home'))
         flash('Senha incorreta.', 'error')
     else:
