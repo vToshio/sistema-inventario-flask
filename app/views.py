@@ -50,7 +50,7 @@ def estoque():
 
 @views.route('/home/vendas')
 def vendas():
-    return render_template('clientes.html', pagetitle='Vendas', session=session)
+    return render_template('vendas.html', pagetitle='Vendas', session=session)
 
 @views.route('/home/clientes')
 def clientes():
