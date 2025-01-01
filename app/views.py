@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, get_flashed_messages, session
 from forms import Login
+from models import *
 
 views = Blueprint('views', __name__)
 
@@ -37,10 +38,6 @@ def home():
         return redirect(url_for('views.login'))
     return render_template('home.html', pagetitle='Home', session=session)
 
-@views.route('/home/vendas')
-def vendas():
-    return render_template('vendas.html', pagetitle='Vendas', session=session)
-
 @views.route('/home/estoque')
 def estoque():
     '''
@@ -51,9 +48,13 @@ def estoque():
         return redirect(url_for('views.login'))
     return render_template('estoque.html', pagetitle='Estoque', session=session)
 
-@views.route('/home/compras')
-def compras():
-    return render_template('compras.html', pagetitle='Compras', session=session)
+@views.route('/home/vendas')
+def vendas():
+    return render_template('clientes.html', pagetitle='Vendas', session=session)
+
+@views.route('/home/clientes')
+def clientes():
+    return render_template('clientes.html', pagetitle='Clientes', session=session)
 
 @views.route('/home/users')
 def users_config():

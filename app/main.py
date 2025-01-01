@@ -23,7 +23,8 @@ def create_app() -> Flask:
                 role='master', 
                 password=bcrypt.generate_password_hash('master123'),
                 email='administrador_empresa@email.com', 
-                date_created=datetime.now()))
+                date_created=datetime.now())
+            )
             db.session.commit()
 
     return app
