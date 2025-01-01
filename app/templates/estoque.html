@@ -1,9 +1,64 @@
 {% extends "base.html" %}
 
+{% block modal %}
+<section id="modal-cadastro-produto">
+
+</section>
+
+<section id="modal-cadastro-categoria">
+
+</section>
+{% endblock %}
+
 {% block content %}
-<div class="dashboard-content">
-    <h1>{{ pagetitle }}</h1> 
+
+<h1>{{ pagetitle }}</h1> 
+
+<div id="container-todos">
+    <div id="botoes-estoque">
+        <button id="cadastrar-produto" type="button">Cadastrar Novo Produto</button>
+        <button id="adicionar-produto" type="button">Adicionar Produto</button>
+        <button id="cadastrar-categoria" data-bs-toggle="collapse" data-bs-target="form-cadastrar-categoria" aria-expanded="false" aria-controls="form-cadastrar-categoria" type="button">Cadastrar Categoria</button>
+        <button id="excluir-categoria" type="button">Excluir Categoria</button>
+        
+        <section id="pesquisa">
+            <input id="barra-pesquisa" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
+            <button id="botao-pesquisa" type="button">Pesquisar</button>
+        </section>
+    </div>
+
+    <div id="container-collapses">
+        <div class="collapse" id="form-cadastrar-categoria">
+            <form action="#" method="post" class="card card-body">
+                exemplo
+            </form>
+        </div>
+    </div>
     
-    
+    <div id="botoes-paginas">
+        <button id="anterior" type="button">anterior</button>
+        <button id="proxima" type="button">proxima</button>
+    </div>
+    <div id="tabela-estoque">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Quantidade</th>
+                    <th scope="col">Preço</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="body-tabela-estoque">
+                <!-- Linhas de registro de produtos -->
+            </tbody>
+        </table>
+    </div>
 </div>
+{% endblock%}
+
+{% block js_imports %}
+<script src="{{ url_for('static', filename='./javascript/estoque.js') }}"></script>
 {% endblock%}

@@ -1,6 +1,7 @@
 from flask import Flask
 from models import db, User
 from views import views
+from api import api
 from validation import val, bcrypt
 from datetime import datetime
 
@@ -8,6 +9,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.register_blueprint(views)
     app.register_blueprint(val)
+    app.register_blueprint(api)
     app.config.from_pyfile('config.py')
 
     with app.app_context():
