@@ -26,7 +26,29 @@
 {% endif %}
 
 {% if products %}    
-<!-- Adicionar Produto -->
+<!-- Adicionar Unidades dos Produtos -->
+<section id="modal-adiciona-unidades" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-adiciona-unidade">=</h5>
+            </div>
+            <form action="{{ url_for('val.add_units') }}" method="post">
+                <div class="modal-body">
+                    <div>
+                        <input type="hidden" name="id-produto-adicionar" id="id-produto-adicionar">
+                        <label class="form-label" for="">Quantidade</label>
+                        <input placeholder="Insira um valor inteiro (Ex: 50, 20, 33...)" class="form-control" name="units" id="units"  class="form-input" type="number">
+                    </div>
+                </div> 
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+                    <button class="btn btn-primary" type="submit">Adicionar Unidades</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
 
 <!-- Editar Produto -->
 
@@ -76,7 +98,7 @@
         <div class="collapse" id="collapse-cadcat">
             <form action="{{ url_for('val.new_category') }}" method="post" class="card card-body">
                 <label for="new_category" class="form-label">Descrição</label>
-                <input id="new_category" name="new_category" type="text" class="form-control">
+                <input id="new_category" name="new_category" placeholder="Nome da Categoria (Ex: Camiseta, Brinquedo, Livro...)" type="text" class="form-control">
                 <button class="btn btn-primary" type="submit">Cadastrar Categoria</button>
             </form>
         </div>
@@ -98,9 +120,8 @@
         <!-- Cadastrar Produtos -->
         <div class="collapse" id="collapse-cadprod">
             <form action="{{ url_for('val.new_product') }}" method="post" class="card card-body">
-                {{ new_product.csrf_token }}
-                {{ new_product.description.label(class="form-label") }} {{ new_product.description(class="form-control")}}
-                {{ new_product.price.label(class="form-label") }} {{ new_product.price(class="form-control") }} 
+                {{ new_product.description.label(class="form-label") }} {{ new_product.description(class="form-control", placeholder="Nome do produto (Ex: Camiseta Verde, Calça Jeans...)")}}
+                {{ new_product.price.label(class="form-label") }} {{ new_product.price(class="form-control", placeholder="Número Decimal (Ex: 54.90, 99.99, 34.90...)") }} 
                 {{ new_product.category_id.label(class="form-label") }} {{new_product.category_id(class="form-select") }}
                 {{ new_product.submit(class="btn btn-primary") }}
             </form>

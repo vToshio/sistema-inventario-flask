@@ -37,7 +37,7 @@ const load_products = async (page) => {
                 <td scope="col">${product.quantity}</td>
                 <td scope="col">${product.price}</td> 
                 <td scope="col">
-                    <button id="adicionar-${product.id}" data-bs-toggle="modal" data-bs-target="" type="button">A</button>
+                    <button class="botao-adicionar-unidade btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adiciona-unidades" type="button">A</button>
                     <button id="editar-${product.id}" data-bs-toggle="modal" data-bs-target="" type="button">E</button>
                     <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deleta-produto" type="button">R</button>
                 </td>
@@ -51,6 +51,11 @@ const load_products = async (page) => {
             input_id : 'id-produto-delete',
             prefix : 'Deletar'
         });
+        attach_event_listeners('botao-adicionar-unidade', handleClick, {
+            title_id : 'titulo-modal-adiciona-unidade',
+            input_id : 'id-produto-adicionar',
+            prefix : 'Adicionar'
+        })
         current_page = data.page;
     } 
     catch (error) {
@@ -74,18 +79,18 @@ const search_products = async () => {
         data.products.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td scope="col">${product.id}</td>
-                <td scope="col">${product.desc}</td>
-                <td scope="col">${product.category}</td>
-                <td scope="col">${product.quantity}</td>
-                <td scope="col">${product.price}</td> 
-                <td scope="col">
-                    <button id="adicionar-${product.id}" data-bs-toggle="modal" data-bs-target="" type="button">A</button>
-                    <button id="editar-${product.id}" data-bs-toggle="modal" data-bs-target="" type="button">E</button>
-                    <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deleta-produto" type="button">R</button>
-                </td>
-            `;
-
+            <td scope="col">${product.id}</td>
+            <td scope="col">${product.desc}</td>
+            <td scope="col">${product.category}</td>
+            <td scope="col">${product.quantity}</td>
+            <td scope="col">${product.price}</td> 
+            <td scope="col">
+                <button class="botao-adicionar-unidade btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adiciona-unidades" type="button">A</button>
+                <button id="editar-${product.id}" data-bs-toggle="modal" data-bs-target="" type="button">E</button>
+                <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deleta-produto" type="button">R</button>
+            </td>
+        `;
+            
             table.appendChild(row);
         });
 
@@ -94,6 +99,11 @@ const search_products = async () => {
             input_id : 'id-produto-delete',
             prefix : 'Deletar'
         });
+        attach_event_listeners('botao-adicionar-unidade', handleClick, {
+            title_id : 'titulo-modal-adiciona-unidade',
+            input_id : 'id-produto-adicionar',
+            prefix : 'Adicionar'
+        })
     }
     catch (error) {
         console.error('Erro na pesquisa de produtos: ', error)

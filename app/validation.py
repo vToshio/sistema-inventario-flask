@@ -48,6 +48,23 @@ def delete_product():
         db.session.commit()
     return redirect(url_for('views.inventory'))
 
+@val.route('/products/add-units', methods=['POST'])
+def add_units():
+    try:
+        product_id = request.form['id-produto-adicionar']
+        units = int(request.form['units'])
+    
+        if not Product.query.filter_by(id=product_id).first():
+            flash('Produto não encontrado na base de dados.')
+        else:
+            product = db.session.query(Product).filter_by(id=product_id).first()
+            product.quantity += units
+            db.session.commit()
+    except ValueError:
+        flash('O tipo de um dado fornecido está inválido')
+    return redirect(url_for('views.inventory'))
+
+
 @val.route('/products/new-category', methods=['POST'])
 def new_category():
     desc = request.form['new_category'].strip()
