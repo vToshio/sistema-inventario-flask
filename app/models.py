@@ -47,13 +47,13 @@ class Product(db.Model):
     price = db.Column('price', db.Numeric(precision=10, scale=2), nullable=False)
     category_id = db.Column('category_id', db.Integer(), db.ForeignKey('product_categories.id'), nullable=False)
 
-    category = db.relationship('ProductCategorie', back_populates='product', foreign_keys=[category_id])
+    category = db.relationship('ProductCategory', back_populates='product', foreign_keys=[category_id])
     sale_products = db.relationship('SaleProducts', back_populates='product', foreign_keys='SaleProducts.product_id')
 
     def __repr__(self):
         return f'<Product: {self.id}>'
     
-class ProductCategorie(db.Model):
+class ProductCategory(db.Model):
     '''
     Model que registra cada categoria de produto em uma tabela 'product_categories'.
     Cada categoria é associada à uma quantidade n de produtos.
@@ -63,13 +63,13 @@ class ProductCategorie(db.Model):
     - [*PK] desc (string[20])
     '''
     __tablename__ = 'product_categories'
-    id = db.Column('id', db.Integer(), primary_key=True, nullable=False)
-    desc = db.Column('desc', db.String(20), nullable=False)
+    id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
+    desc = db.Column('desc', db.String(20), nullable=False, unique=True)
 
     product = db.relationship('Product', back_populates='category', foreign_keys='Product.category_id')
 
     def __repr__(self):
-        return f'<ProductCategories {self.id}: {self.desc}>'
+        return f'<ProductCategory {self.id}: {self.desc}>'
 
 
 class Customer(db.Model):

@@ -20,6 +20,7 @@ const load_products = async (page) => {
                 <td scope="col">${product.quantity}</td>
                 <td scope="col">${product.price}</td> 
                 <td scope="col">
+                    <button id="adicionar-${product.id}" type="button">A</button>
                     <button id="editar-${product.id}" type="button">E</button>
                     <button id="remover-${product.id}" type="button">R</button>
                 </td>
@@ -66,6 +67,14 @@ const search_products = async () => {
         console.error('Erro na pesquisa de produtos: ', error)
     };
 };
+
+/* Modal Deletar Categoria */
+document.getElementById('botao-deletar-categoria').addEventListener('click', () => {
+    const category_id = document.getElementById('select-categoria-delete').value;
+    const category_desc = document.getElementById(`option-${category_id}`).textContent;
+    document.getElementById('titulo-modal').textContent = 'Deletar ' + category_desc;
+    document.getElementById('id-categoria-delete').value = category_id;
+}); 
 
 /* Barra de Pesquisa */
 document.getElementById('botao-pesquisa').addEventListener('click', () => search_products())

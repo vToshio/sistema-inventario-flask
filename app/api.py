@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, redirect, jsonify, url_for, flash, request, session
-from models import db, Product, ProductCategorie
+from models import db, Product, ProductCategory
 
 api = Blueprint('api', __name__)
 
@@ -36,10 +36,10 @@ def get_products():
 def search_products():
     query = request.args.get('query', default='')
 
-    products = Product.query.join(ProductCategorie).filter(
+    products = Product.query.join(ProductCategory).filter(
         ((Product.id == query) |
         (Product.desc == query) |
-        (ProductCategorie.desc == query))
+        (ProductCategory.desc == query))
     ).all()
 
     prod_list = [

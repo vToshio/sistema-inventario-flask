@@ -19,9 +19,9 @@
             <ul>
                 <!-- Divisoria 1 -->
                 <li><a href="{{ url_for('views.home') }}">Home</a></li>
-                <li><a href="{{ url_for('views.estoque') }}">Estoque</a></li>
-                <li><a href="{{ url_for('views.clientes') }}">Clientes</a></li>
-                <li><a href="{{ url_for('views.vendas') }}">Vendas</a></li>
+                <li><a href="{{ url_for('views.inventory') }}">Estoque</a></li>
+                <li><a href="{{ url_for('views.clients') }}">Clientes</a></li>
+                <li><a href="{{ url_for('views.sales') }}">Vendas</a></li>
             </ul>
             
             <hr>
@@ -42,8 +42,30 @@
         <section class="content">
             {% block content %} {% endblock %}
         </section>
+
+        
+        {% if messages %}
+        <section id="toasts-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+            {% set counter = 0 %}
+            {% for msg in messages %}
+            <div id="liveToast-{{ counter }}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Sistema</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ msg }}
+                </div>
+            </div>
+            {% set counter = counter + 1 %}
+            {% endfor %}
+        </section>
+        {% endif %}
     </main>
     
     {% block js_imports %} {% endblock %}
+    <script src="{{ url_for('static', filename='./javascript/toasts.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>    
 </body>
 </html>

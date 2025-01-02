@@ -34,26 +34,30 @@ def home():
     Render the home webpage if the user is logged in.
     '''
     if'logged_user' not in session.keys() or session['logged_user'] is None:
-        flash('Página inacessível enquanto o usuário não estiver logado.', 'error')
+        flash('Página inacessível enquanto o usuário não estiver logado.')
         return redirect(url_for('views.login'))
     return render_template('home.html', pagetitle='Home', session=session)
 
 @views.route('/home/estoque')
-def estoque():
+def inventory():
     '''
     Render the stock webpage if the user is logged in.
     '''
     if'logged_user' not in session.keys() or session['logged_user'] is None:
-        flash('Página inacessível enquanto o usuário não estiver logado.', 'error')
+        flash('Página inacessível enquanto o usuário não estiver logado.')
         return redirect(url_for('views.login'))
-    return render_template('estoque.html', pagetitle='Estoque', session=session)
+    
+    categories = ProductCategory.query.all()
+    messages = get_flashed_messages()
+
+    return render_template('estoque.html', pagetitle='Estoque', messages=messages, categories=categories, session=session)
 
 @views.route('/home/vendas')
-def vendas():
+def sales():
     return render_template('vendas.html', pagetitle='Vendas', session=session)
 
 @views.route('/home/clientes')
-def clientes():
+def clients():
     return render_template('clientes.html', pagetitle='Clientes', session=session)
 
 @views.route('/home/users')
@@ -61,5 +65,5 @@ def users_config():
     pass
 
 @views.route('/home/<username>')
-def perfil(username: str):
+def profile(username: str):
     pass
