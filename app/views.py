@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, get_flashed_messages, session
-from forms import Login
+from forms import *
 from models import *
 
 views = Blueprint('views', __name__)
@@ -17,6 +17,7 @@ def root():
 @views.route('/login', methods=['GET', 'POST'])
 def login():
     '''Render the login page.'''
+    form = Login()
     return render_template('login.html', next=url_for('val.login_validation'), form=Login(), messages=get_flashed_messages(with_categories=True))
 
 @views.route('/logout', methods=['POST'])
@@ -47,10 +48,12 @@ def inventory():
         flash('Página inacessível enquanto o usuário não estiver logado.')
         return redirect(url_for('views.login'))
     
+    products = Product.query.first()
     categories = ProductCategory.query.all()
+    new_product = NewProductRecord()
     messages = get_flashed_messages()
 
-    return render_template('estoque.html', pagetitle='Estoque', messages=messages, categories=categories, session=session)
+    return render_template('estoque.html', pagetitle='Estoque', new_product=new_product, messages=messages, categories=categories, products=products, session=session)
 
 @views.route('/home/vendas')
 def sales():

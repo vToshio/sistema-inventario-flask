@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 
 {% block modal %}
+
+{% if categories %}
+<!-- Modal Deletar Categorias -->
 <section id="modal-deleta-categoria" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="titulo-modal" class="modal-title"></h5>
+                <h5 id="titulo-modal-deleta-categoria" class="modal-title"></h5>
             </div>
             <div class="modal-body">
                 <p>Tem certeza de que deseja deletar essa categoria? Ela será removida do banco de dados e não poderá ser recuperada.</p>
@@ -20,6 +23,35 @@
         </div>
     </div>
 </section>
+{% endif %}
+
+{% if products %}    
+<!-- Adicionar Produto -->
+
+<!-- Editar Produto -->
+
+<!-- Modal Deletar Produtos -->
+<section id="modal-deleta-produto" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-deleta-produto" class="modal-title"></h5>
+            </div>
+            <div class="modal-body">
+                <p>Deseja mesmo remover esse produto? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
+            </div>
+            <div class="modal-footer">
+                <form action="{{ url_for('val.delete_product') }}" method="post">
+                    <input type="hidden" name="id-produto-delete" id="id-produto-delete">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" type="submit">Deletar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {% endblock %}
 
 {% block content %}
@@ -28,25 +60,18 @@
 
 <div id="container-todos">
     <div id="botoes-estoque">
-        <button id="cadastrar-produto" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>
         <button id="cadastrar-categoria" data-bs-toggle="collapse" data-bs-target="#collapse-cadcat" aria-expanded="false" aria-controls="collapse-cadcat" type="button">Cadastrar Categoria</button>
         {% if categories %}
         <button id="excluir-categoria" data-bs-toggle="collapse" data-bs-target="#collapse-delcat" aria-expanded="false" aria-controls="collapse-delcad" type="button">Deletar Categoria</button>
+        <button id="cadastrar-produto" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>
         {% endif %}
 
         <input id="barra-pesquisa" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
         <button id="botao-pesquisa" type="button">Pesquisar</button>
         <a href="{{ url_for('views.inventory') }}" class="btn btn-secondary">Recarregar</a>
     </div>
-
+    
     <div id="container-collapses">
-        <!-- Cadastrar Produtos -->
-        <div class="collapse" id="collapse-cadprod">
-            <form action="#" class="card card-body">
-                <p>Cadastrar Produto</p>
-            </form>
-        </div>
-        
         <!-- Cadastrar Categoria -->
         <div class="collapse" id="collapse-cadcat">
             <form action="{{ url_for('val.new_category') }}" method="post" class="card card-body">
@@ -57,10 +82,9 @@
         </div>
 
         {% if categories %}
-        <!-- Deletar Categoria -->
+        <!-- Deletar Categorias -->
         <div class="collapse" id="collapse-delcat">
             <div class="card card-body">
-                <p>Deletar Categoria</p>
                 <label for="select-categoria-delete" class="form-label">Descrição</label>
                 <select name="select-categoria-delete" id="select-categoria-delete" class="form-select">
                     {% for category in categories %}
@@ -70,6 +94,18 @@
                 <button id="botao-deletar-categoria" data-bs-toggle="modal" data-bs-target="#modal-deleta-categoria" class="btn btn-danger" type="submit">Deletar Categoria</button>
             </div>
         </div>
+
+        <!-- Cadastrar Produtos -->
+        <div class="collapse" id="collapse-cadprod">
+            <form action="{{ url_for('val.new_product') }}" method="post" class="card card-body">
+                {{ new_product.csrf_token }}
+                {{ new_product.description.label(class="form-label") }} {{ new_product.description(class="form-control")}}
+                {{ new_product.price.label(class="form-label") }} {{ new_product.price(class="form-control") }} 
+                {{ new_product.category_id.label(class="form-label") }} {{new_product.category_id(class="form-select") }}
+                {{ new_product.submit(class="btn btn-primary") }}
+            </form>
+        </div>
+        
         {% endif %}
     </div>
     
@@ -98,5 +134,5 @@
 {% endblock%}
 
 {% block js_imports %}
-<script src="{{ url_for('static', filename='./javascript/estoque.js') }}"></script>
+<script src="{{ url_for('static', filename='./javascript/load_inventory.js') }}"></script>
 {% endblock%}
