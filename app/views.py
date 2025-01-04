@@ -1,72 +1,114 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, get_flashed_messages, session
+from flask import Blueprint, render_template, redirect, url_for, flash, get_flashed_messages, session, request
+from flask_bcrypt import Bcrypt
+from helpers import login_required
 from forms import *
 from models import *
 
 views = Blueprint('views', __name__)
+bcrypt = Bcrypt()
 
 @views.route('/', methods=['GET'])
+@login_required
 def root():
     '''
-    Define the root endpoint as an unreachable page. 
-    It redirects to the home page if the user is logged in or to the login page, if the user isn't.
+    Endpoint root, que ao ser acessado por método GET, redireciona o usuário para a página de login ou para a home do sistema (caso o usuário não esteja logado).
     '''
-    if 'logged_user' in session.keys() and session['logged_user'] is not None:
-        return redirect(url_for('views.home'))
     return redirect(url_for('views.login', next=url_for('views.home')))
 
-@views.route('/login', methods=['GET', 'POST'])
-def login():
-    '''Render the login page.'''
-    form = Login()
-    return render_template('login.html', next=url_for('val.login_validation'), form=Login(), messages=get_flashed_messages(with_categories=True))
+@views.route('/sistema/error/<error_name>')
+def error(error: str):
+    return render_template('erro.html', pagetitle='Erro de acesso' ,error=error)
 
-@views.route('/logout', methods=['POST'])
+@views.route('/sistema/login', methods=['GET', 'POST'])
+def login():
+    '''
+    Métodos:
+    - GET: renderiza a página Web com o formulário de Login
+    - POST: valida os dados fornecidos pelo formulário de Login 
+    '''
+    try:
+        # If POST HTTP
+        if request.method == 'POST':
+            form = LoginForm()
+
+            if form.validate_on_submit():
+                next = form.nextpage.data
+                username = form.username.data
+                passwd = form.password.data
+        
+            found_user = User.query.filter(User.username == username).first()
+            if found_user:
+                if bcrypt.check_password_hash(found_user.password, passwd):
+                    session['logged_user'] = username
+                    session['user_role'] = found_user.role
+                    return redirect(url_for('views.home'))
+                flash('Senha incorreta.', 'error')
+            else:
+                flash('Usuário ainda não cadastrado.', 'error')
+            return redirect(url_for('views.login', next=next))
+        
+        # If GET HTTP
+        form = LoginForm()
+        return render_template('login.html', next=url_for('views.login'), form=form, messages=get_flashed_messages(with_categories=True))
+    except Exception as e:
+        return redirect(url_for('views.error', error=e))
+
+@views.route('/sistema/logout', methods=['POST'])
 def logout():
     '''
-    Set the keys 'logged_user' and 'user_role' as None on the current session.
+    Métodos: 
+    - POST: finaliza a sessão do usuário logado no sistema.
     '''
-    session.pop('logged_user', None)
-    session.pop('user_role', None)
-    return redirect(url_for('views.login', next=url_for('views.home')))
+    try:
+        session.pop('logged_user')
+        session.pop('user_role')
+        return redirect(url_for('views.login', next=url_for('views.home')))
+    except Exception as e:
+        return redirect(url_for('views.error', error=e))
 
-@views.route('/home', methods=['GET', 'POST'])
+@views.route('/sistema/home', methods=['GET'])
+@login_required
 def home():
     '''
-    Render the home webpage if the user is logged in.
+    Métodos:
+    - GET: renderiza a página Home do sistema.
     '''
-    if'logged_user' not in session.keys() or session['logged_user'] is None:
-        flash('Página inacessível enquanto o usuário não estiver logado.')
-        return redirect(url_for('views.login'))
     return render_template('home.html', pagetitle='Home', session=session)
 
-@views.route('/home/estoque')
+@views.route('/sistema/home/estoque', methods=['GET'])
+@login_required
 def inventory():
     '''
-    Render the stock webpage if the user is logged in.
+    Métodos:
+    - GET: Renderiza a página de gerenciamento do estoque.
     '''
-    if'logged_user' not in session.keys() or session['logged_user'] is None:
-        flash('Página inacessível enquanto o usuário não estiver logado.')
-        return redirect(url_for('views.login'))
-    
-    products = Product.query.first()
-    categories = ProductCategory.query.all()
-    new_product = NewProductRecord()
-    messages = get_flashed_messages()
+    try:
+        products = Product.query.first()
+        categories = ProductCategory.query.all()
+        new_product = NewProductForm()
+        messages = get_flashed_messages()
 
-    return render_template('estoque.html', pagetitle='Estoque', new_product=new_product, messages=messages, categories=categories, products=products, session=session)
+        return render_template('estoque.html', pagetitle='Estoque', new_product=new_product, messages=messages, categories=categories, products=products, session=session)
+    except Exception as e:
+        flash(f'Falha ao carregar arquivos do estoque: {e}')
+        return redirect(url_for('views.home'))
 
-@views.route('/home/vendas')
+@views.route('/sistema/home/vendas')
+@login_required
 def sales():
     return render_template('vendas.html', pagetitle='Vendas', session=session)
 
-@views.route('/home/clientes')
+@views.route('/sistema/home/clientes')
+@login_required
 def clients():
     return render_template('clientes.html', pagetitle='Clientes', session=session)
 
-@views.route('/home/users')
+@views.route('/sistema/home/users')
+@login_required
 def users_config():
     pass
 
-@views.route('/home/<username>')
+@views.route('/sistema/home/profile/<username>')
+@login_required
 def profile(username: str):
     pass

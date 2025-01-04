@@ -1,19 +1,34 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FloatField, SelectField, SubmitField, HiddenField, validators
+from wtforms import StringField, PasswordField, FloatField, SelectField, SubmitField, HiddenField
+from wtforms.validators import DataRequired, Length
 from models import db, ProductCategory
 
-class Login(FlaskForm):
-    username = StringField('Usuário', validators=[validators.DataRequired()])
-    password = PasswordField('Senha', validators=[validators.DataRequired()])
+DATA_REQUIRED_MESSAGE = 'O preenchimento deste campo é obrigatório.'
+
+class LoginForm(FlaskForm):
+    username = StringField('Usuário', id='username-login', name='username-login', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
+    password = PasswordField('Senha', id='senha-login', name='senha-login', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
     submit = SubmitField('Entrar')
     nextpage = HiddenField()
 
-class NewProductRecord(FlaskForm):
-    description = StringField('Descrição', validators=[validators.DataRequired(), validators.Length(max=100)])
-    price = FloatField('Preço', validators=[validators.DataRequired()])
-    category_id = SelectField('Categoria', choices=[], validators=[validators.DataRequired()])
+class NewProductForm(FlaskForm):
+    description = StringField('Descrição', id='desc-cadastrar', name='desc-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=100)])
+    price = FloatField('Preço', id='preco-cadastrar', name='preco-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
+    category_id = SelectField('Categoria', id='idcategoria-cadastrar', name='idcategoria-cadastrar', choices=[], validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
     submit = SubmitField('Cadastrar Produto')
 
     def __init__(self, *args, **kwargs):
-        super(NewProductRecord, self).__init__(*args, **kwargs)
+        super(NewProductForm, self).__init__(*args, **kwargs)
         self.category_id.choices = [(cat.id, cat.desc) for cat in db.session.query(ProductCategory).all()]
+
+class EditProductForm(FlaskForm):
+    pass    
+
+class DeleteProductForm(FlaskForm):
+    pass
+
+class NewCategoryForm(FlaskForm):
+    pass
+
+class DeleteCategoryForm(FlaskForm):
+    pass

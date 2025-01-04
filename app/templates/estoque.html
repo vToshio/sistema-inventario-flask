@@ -4,18 +4,18 @@
 
 {% if categories %}
 <!-- Modal Deletar Categorias -->
-<section id="modal-deleta-categoria" class="modal" tabindex="-1">
+<section id="modal-deletar-categoria" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="titulo-modal-deleta-categoria" class="modal-title"></h5>
+                <h5 id="titulo-modal-deletar-categoria" class="modal-title"></h5>
             </div>
             <div class="modal-body">
                 <p>Tem certeza de que deseja deletar essa categoria? Ela será removida do banco de dados e não poderá ser recuperada.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('val.delete_category') }}" method="post">
-                    <input type="hidden" name="id-categoria-delete" id="id-categoria-delete">
+                <form action="{{ url_for('api.delete_category') }}" method="post">
+                    <input type="hidden" name="id-categoria-deletar" id="id-categoria-deletar">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-danger" type="submit">Deletar</button>
                 </form>
@@ -27,18 +27,18 @@
 
 {% if products %}    
 <!-- Adicionar Unidades dos Produtos -->
-<section id="modal-adiciona-unidades" class="modal" tabindex="-1">
+<section id="modal-adicionar-unidades" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="titulo-modal-adiciona-unidade">=</h5>
+                <h5 id="titulo-modal-adicionar-unidades">=</h5>
             </div>
-            <form action="{{ url_for('val.add_units') }}" method="post">
+            <form action="{{ url_for('api.add_units') }}" method="post">
                 <div class="modal-body">
                     <div>
                         <input type="hidden" name="id-produto-adicionar" id="id-produto-adicionar">
-                        <label class="form-label" for="">Quantidade</label>
-                        <input placeholder="Insira um valor inteiro (Ex: 50, 20, 33...)" class="form-control" name="units" id="units"  class="form-input" type="number">
+                        <label class="form-label" for="units-adicionar">Quantidade</label>
+                        <input placeholder="Insira um valor inteiro (Ex: 50, 20, 33...)" class="form-control" name="units-adicionar" id="units-adicionar"  class="form-input" type="number">
                     </div>
                 </div> 
                 <div class="modal-footer">
@@ -51,20 +51,23 @@
 </section>
 
 <!-- Editar Produto -->
+<section id="modal-editar-produto" class="modal" tabindex="-1">
+
+</section>
 
 <!-- Modal Deletar Produtos -->
-<section id="modal-deleta-produto" class="modal" tabindex="-1">
+<section id="modal-deletar-produto" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="titulo-modal-deleta-produto" class="modal-title"></h5>
+                <h5 id="titulo-modal-deletar-produto" class="modal-title"></h5>
             </div>
             <div class="modal-body">
                 <p>Deseja mesmo remover esse produto? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('val.delete_product') }}" method="post">
-                    <input type="hidden" name="id-produto-delete" id="id-produto-delete">
+                <form action="{{ url_for('api.delete_product') }}" method="post">
+                    <input type="hidden" name="id-produto-deletar" id="id-produto-deletar">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-danger" type="submit">Deletar</button>
                 </form>
@@ -96,9 +99,9 @@
     <div id="container-collapses">
         <!-- Cadastrar Categoria -->
         <div class="collapse" id="collapse-cadcat">
-            <form action="{{ url_for('val.new_category') }}" method="post" class="card card-body">
-                <label for="new_category" class="form-label">Descrição</label>
-                <input id="new_category" name="new_category" placeholder="Nome da Categoria (Ex: Camiseta, Brinquedo, Livro...)" type="text" class="form-control">
+            <form action="{{ url_for('api.new_category') }}" method="post" class="card card-body">
+                <label for="desc-categoria-cadastrar" class="form-label">Descrição</label>
+                <input id="desc-categoria-cadastrar" name="desc-categoria-cadastrar" placeholder="Nome da Categoria (Ex: Camiseta, Brinquedo, Livro...)" type="text" class="form-control">
                 <button class="btn btn-primary" type="submit">Cadastrar Categoria</button>
             </form>
         </div>
@@ -107,19 +110,20 @@
         <!-- Deletar Categorias -->
         <div class="collapse" id="collapse-delcat">
             <div class="card card-body">
-                <label for="select-categoria-delete" class="form-label">Descrição</label>
-                <select name="select-categoria-delete" id="select-categoria-delete" class="form-select">
+                <label for="select-deletar-categoria" class="form-label">Descrição</label>
+                <select name="select-deletar-categoria" id="select-deletar-categoria" class="form-select">
                     {% for category in categories %}
-                    <option value="{{ category.id }}" id="option-{{ category.id }}">{{ category.desc }}</option>
+                    <option value="{{ category.id }}">{{ category.desc }}</option>
                     {% endfor %}
                 </select>
-                <button id="botao-deletar-categoria" data-bs-toggle="modal" data-bs-target="#modal-deleta-categoria" class="btn btn-danger" type="submit">Deletar Categoria</button>
+                <button id="botao-deletar-categoria" data-bs-toggle="modal" data-bs-target="#modal-deletar-categoria" class="btn btn-danger" type="submit">Deletar Categoria</button>
             </div>
         </div>
 
         <!-- Cadastrar Produtos -->
         <div class="collapse" id="collapse-cadprod">
-            <form action="{{ url_for('val.new_product') }}" method="post" class="card card-body">
+            <form action="{{ url_for('api.new_product') }}" method="post" class="card card-body">
+                {{ new_product.csrf_token }}
                 {{ new_product.description.label(class="form-label") }} {{ new_product.description(class="form-control", placeholder="Nome do produto (Ex: Camiseta Verde, Calça Jeans...)")}}
                 {{ new_product.price.label(class="form-label") }} {{ new_product.price(class="form-control", placeholder="Número Decimal (Ex: 54.90, 99.99, 34.90...)") }} 
                 {{ new_product.category_id.label(class="form-label") }} {{new_product.category_id(class="form-select") }}
