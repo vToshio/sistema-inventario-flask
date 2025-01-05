@@ -15,9 +15,10 @@
             </div>
             <div class="modal-footer">
                 <form action="{{ url_for('api.delete_category') }}" method="post">
-                    <input type="hidden" name="id-categoria-deletar" id="id-categoria-deletar">
+                    {{ delete_category.csrf_token }}
+                    {{ delete_category.id() }}
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-danger" type="submit">Deletar</button>
+                    {{ delete_category.submit(class='btn btn-danger') }}
                 </form>
             </div>
         </div>
@@ -36,14 +37,15 @@
             <form action="{{ url_for('api.add_units') }}" method="post">
                 <div class="modal-body">
                     <div>
-                        <input type="hidden" name="id-produto-adicionar" id="id-produto-adicionar">
-                        <label class="form-label" for="units-adicionar">Quantidade</label>
-                        <input placeholder="Insira um valor inteiro (Ex: 50, 20, 33...)" class="form-control" name="units-adicionar" id="units-adicionar"  class="form-input" type="number">
+                        {{ add_units.csrf_token }}
+                        {{ add_units.id() }}
+
+                        {{ add_units.units.label(class='form-label') }} {{ add_units.units(class='form-control', placeholder='Insira um valor inteiro (Ex: 50, 20, 33...)') }}
                     </div>
                 </div> 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-                    <button class="btn btn-primary" type="submit">Adicionar Unidades</button>
+                    {{ add_units.submit(class='btn btn-primary')}}
                 </div>
             </form>
         </div>
@@ -67,9 +69,11 @@
             </div>
             <div class="modal-footer">
                 <form action="{{ url_for('api.delete_product') }}" method="post">
-                    <input type="hidden" name="id-produto-deletar" id="id-produto-deletar">
+                    {{ delete_product.csrf_token }}
+                    {{ delete_product.id() }}
+                    
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-danger" type="submit">Deletar</button>
+                    {{ delete_product.submit(class='btn btn-danger') }}
                 </form>
             </div>
         </div>
@@ -93,16 +97,15 @@
 
         <input id="barra-pesquisa" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
         <button id="botao-pesquisa" type="button">Pesquisar</button>
-        <a href="{{ url_for('views.inventory') }}" class="btn btn-secondary">Recarregar</a>
     </div>
     
     <div id="container-collapses">
         <!-- Cadastrar Categoria -->
         <div class="collapse" id="collapse-cadcat">
             <form action="{{ url_for('api.new_category') }}" method="post" class="card card-body">
-                <label for="desc-categoria-cadastrar" class="form-label">Descrição</label>
-                <input id="desc-categoria-cadastrar" name="desc-categoria-cadastrar" placeholder="Nome da Categoria (Ex: Camiseta, Brinquedo, Livro...)" type="text" class="form-control">
-                <button class="btn btn-primary" type="submit">Cadastrar Categoria</button>
+                {{ new_category.csrf_token }}
+                {{ new_category.desc.label(class='form-label') }} {{ new_category.desc(class='form-control', placeholder='Nome da Categoria (Ex: Camiseta, Brinquedo, Livro...)') }}
+                {{ new_category.submit(class='btn btn-primary')}}
             </form>
         </div>
 
@@ -124,7 +127,7 @@
         <div class="collapse" id="collapse-cadprod">
             <form action="{{ url_for('api.new_product') }}" method="post" class="card card-body">
                 {{ new_product.csrf_token }}
-                {{ new_product.description.label(class="form-label") }} {{ new_product.description(class="form-control", placeholder="Nome do produto (Ex: Camiseta Verde, Calça Jeans...)")}}
+                {{ new_product.desc.label(class="form-label") }} {{ new_product.desc(class="form-control", placeholder="Nome do produto (Ex: Camiseta Verde, Calça Jeans...)")}}
                 {{ new_product.price.label(class="form-label") }} {{ new_product.price(class="form-control", placeholder="Número Decimal (Ex: 54.90, 99.99, 34.90...)") }} 
                 {{ new_product.category_id.label(class="form-label") }} {{new_product.category_id(class="form-select") }}
                 {{ new_product.submit(class="btn btn-primary") }}

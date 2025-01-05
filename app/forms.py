@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FloatField, SelectField, SubmitField, HiddenField
+from wtforms import StringField, PasswordField, IntegerField, FloatField, SelectField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Length
 from models import db, ProductCategory
 
@@ -12,7 +12,7 @@ class LoginForm(FlaskForm):
     nextpage = HiddenField()
 
 class NewProductForm(FlaskForm):
-    description = StringField('Descrição', id='desc-cadastrar', name='desc-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=100)])
+    desc = StringField('Descrição', id='desc-cadastrar', name='desc-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=100)])
     price = FloatField('Preço', id='preco-cadastrar', name='preco-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
     category_id = SelectField('Categoria', id='idcategoria-cadastrar', name='idcategoria-cadastrar', choices=[], validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
     submit = SubmitField('Cadastrar Produto')
@@ -21,14 +21,22 @@ class NewProductForm(FlaskForm):
         super(NewProductForm, self).__init__(*args, **kwargs)
         self.category_id.choices = [(cat.id, cat.desc) for cat in db.session.query(ProductCategory).all()]
 
+class AddUnitsForm(FlaskForm):
+    id = HiddenField(name='id-produto-adicionar', id='id-produto-adicionar')
+    units = IntegerField('Quantidade', name='units-adicionar', id='units-adicionar', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
+    submit = SubmitField('Adicionar Unidades')
+
 class EditProductForm(FlaskForm):
     pass    
 
 class DeleteProductForm(FlaskForm):
-    pass
+    id = HiddenField(id='id-produto-deletar', name='id-produto-deletar')
+    submit = SubmitField('Deletar Produto')
 
 class NewCategoryForm(FlaskForm):
-    pass
+    desc = StringField('Descrição', id='desc-categoria-cadastrar', name='desc-categoria-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=20)])
+    submit = SubmitField('Cadastrar Categoria')
 
 class DeleteCategoryForm(FlaskForm):
-    pass
+    id = HiddenField(id='id-categoria-deletar', name='id-categoria-deletar')
+    submit = SubmitField('Deletar Categoria')

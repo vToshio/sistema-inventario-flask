@@ -32,9 +32,9 @@ def login():
             form = LoginForm()
 
             if form.validate_on_submit():
-                next = form.nextpage.data
-                username = form.username.data
-                passwd = form.password.data
+                next = str(form.nextpage.data)
+                username = str(form.username.data)
+                passwd = str(form.password.data)
         
             found_user = User.query.filter(User.username == username).first()
             if found_user:
@@ -53,11 +53,12 @@ def login():
     except Exception as e:
         return redirect(url_for('views.error', error=e))
 
-@views.route('/sistema/logout', methods=['POST'])
+@views.route('/sistema/logout', methods=['GET'])
+@login_required
 def logout():
     '''
     Métodos: 
-    - POST: finaliza a sessão do usuário logado no sistema.
+    - GET: finaliza a sessão do usuário logado no sistema.
     '''
     try:
         session.pop('logged_user')
@@ -82,16 +83,33 @@ def inventory():
     Métodos:
     - GET: Renderiza a página de gerenciamento do estoque.
     '''
-    try:
-        products = Product.query.first()
-        categories = ProductCategory.query.all()
-        new_product = NewProductForm()
-        messages = get_flashed_messages()
+   
+    products = Product.query.first()
+    categories = ProductCategory.query.all()
+        
+    new_product = NewProductForm()
+    add_units = AddUnitsForm()
+    edit_product = EditProductForm()
+    delete_product = DeleteProductForm()
+    new_category = NewCategoryForm()
+    delete_category = DeleteCategoryForm()
+        
+    messages = get_flashed_messages()
 
-        return render_template('estoque.html', pagetitle='Estoque', new_product=new_product, messages=messages, categories=categories, products=products, session=session)
-    except Exception as e:
-        flash(f'Falha ao carregar arquivos do estoque: {e}')
-        return redirect(url_for('views.home'))
+    return render_template(
+        'estoque.html',
+        pagetitle='Estoque',
+        new_product=new_product,
+        add_units=add_units,
+        edit_product=edit_product,
+        delete_product=delete_product,
+        new_category=new_category,
+        delete_category=delete_category, 
+        messages=messages, 
+        categories=categories, 
+        products=products, 
+        session=session
+    )
 
 @views.route('/sistema/home/vendas')
 @login_required

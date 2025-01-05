@@ -10,10 +10,10 @@ def create_app() -> Flask:
     app.register_blueprint(views)
     app.register_blueprint(api)
     app.config.from_pyfile('config.py')
-
+    
     with app.app_context():
-        bcrypt.init_app(app)
         csrf.init_app(app)
+        bcrypt.init_app(app)
         db.init_app(app)
         db.create_all()
 
