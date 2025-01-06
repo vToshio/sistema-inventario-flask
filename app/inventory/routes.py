@@ -1,9 +1,44 @@
-from flask import Blueprint, redirect, jsonify, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, jsonify, url_for, flash, get_flashed_messages, request, session
 from app.models import db, Product, ProductCategory
 from app.helpers import login_required
 from app.inventory.forms import *
 
 inventory = Blueprint('inventory', __name__)
+
+@inventory.route('/sistema/home/estoque', methods=['GET'])
+@login_required
+def render_page():
+    '''
+    Métodos:
+    - GET: Renderiza a página de gerenciamento do estoque.
+    '''
+   
+    products = Product.query.first()
+    categories = ProductCategory.query.all()
+        
+    new_product = NewProductForm()
+    add_units = AddUnitsForm()
+    edit_product = EditProductForm()
+    delete_product = DeleteProductForm()
+    new_category = NewCategoryForm()
+    delete_category = DeleteCategoryForm()
+        
+    messages = get_flashed_messages()
+
+    return render_template(
+        'estoque.html',
+        pagetitle='Estoque',
+        new_product=new_product,
+        add_units=add_units,
+        edit_product=edit_product,
+        delete_product=delete_product,
+        new_category=new_category,
+        delete_category=delete_category, 
+        messages=messages, 
+        categories=categories, 
+        products=products, 
+        session=session
+    )
 
 @inventory.route('/api/products', methods=['GET'])
 @login_required
@@ -59,8 +94,8 @@ def search_products():
 
     products = Product.query.join(ProductCategory).filter(
         ((Product.id == query) |
-        (Product.desc.ilike(query)) |
-        (ProductCategory.ilike(query)))
+        (Product.desc == query) |
+        (ProductCategory == query))
     ).all()
 
     prod_list = [
@@ -100,7 +135,7 @@ def new_product():
                 flash(f'Erro no cadastro do produto - {e}')
     else:
         flash('Todos os campos devem estar preenchidos.')
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/products/add-units', methods=['POST'])
@@ -128,7 +163,7 @@ def add_units():
         for field, errors in form.errors.items():
             for e in errors:
                 flash(f'Erro no campo {field}: {e}')
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('inventory.render_page'))
 
 @inventory.route('/api/products/edit', methods=['POST'])
 @login_required
@@ -158,7 +193,7 @@ def edit_product():
         for field, errors in form.errors.items():
             for e in errors:
                 flash(f'Erro no campo {field}: {e}')
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/products/delete', methods=['POST'])
@@ -186,7 +221,7 @@ def delete_product():
         for field, errors in form.errors.items():
             for e in errors:
                 flash(f'Erro no campo {field}: {e}')
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/categories/new', methods=['POST'])
@@ -213,7 +248,7 @@ def new_category():
         for field, errors in form.errors.items():
             for e in errors:
                 flash(f'Erro no campo {field}: {e}')
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/categories/delete', methods=['POST'])
@@ -242,4 +277,4 @@ def delete_category():
         for field, errors in form.errors.items():
             for e in errors:
                 flash(f'Erro no campo {field}: {e}')
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('inventory.render_page'))

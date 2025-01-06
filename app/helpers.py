@@ -1,10 +1,10 @@
-from flask import flash, redirect, url_for, session, request
+from flask import flash, redirect, url_for, session
 from flask_wtf.csrf import CSRFProtect
+from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import model
 from functools import wraps
-import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+bcrypt = Bcrypt()
 csrf = CSRFProtect()
 
 def get_object(model: model, **kwargs):

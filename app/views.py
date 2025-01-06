@@ -1,11 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, get_flashed_messages, session, request
 from flask_bcrypt import Bcrypt
-from app.helpers import login_required
+from app.helpers import login_required, bcrypt
 from app.inventory.forms import *
 from app.models import *
 
 views = Blueprint('views', __name__)
-bcrypt = Bcrypt()
 
 @views.route('/', methods=['GET'])
 @login_required
@@ -76,50 +75,10 @@ def home():
     '''
     return render_template('home.html', pagetitle='Home', session=session)
 
-@views.route('/sistema/home/estoque', methods=['GET'])
-@login_required
-def inventory():
-    '''
-    Métodos:
-    - GET: Renderiza a página de gerenciamento do estoque.
-    '''
-   
-    products = Product.query.first()
-    categories = ProductCategory.query.all()
-        
-    new_product = NewProductForm()
-    add_units = AddUnitsForm()
-    edit_product = EditProductForm()
-    delete_product = DeleteProductForm()
-    new_category = NewCategoryForm()
-    delete_category = DeleteCategoryForm()
-        
-    messages = get_flashed_messages()
-
-    return render_template(
-        'estoque.html',
-        pagetitle='Estoque',
-        new_product=new_product,
-        add_units=add_units,
-        edit_product=edit_product,
-        delete_product=delete_product,
-        new_category=new_category,
-        delete_category=delete_category, 
-        messages=messages, 
-        categories=categories, 
-        products=products, 
-        session=session
-    )
-
 @views.route('/sistema/home/vendas')
 @login_required
 def sales():
     return render_template('vendas.html', pagetitle='Vendas', session=session)
-
-@views.route('/sistema/home/clientes')
-@login_required
-def clients():
-    return render_template('clientes.html', pagetitle='Clientes', session=session)
 
 @views.route('/sistema/home/users')
 @login_required
