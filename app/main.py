@@ -5,13 +5,13 @@ from app.models import db, User
 from app.views import views
 from app.helpers import csrf, bcrypt
 from app.inventory.routes import inventory
-from app.clients.routes import clients
+from app.clients.routes import customers
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.register_blueprint(views)
     app.register_blueprint(inventory)
-    app.register_blueprint(clients)
+    app.register_blueprint(customers)
     app.config.from_pyfile('config.py')
     
     with app.app_context():

@@ -59,9 +59,13 @@ const load_products = async (page) => {
     try {
         const response = await fetch(`/api/products?page=${current_page}&per_page=${per_page}`);
         const data = await response.json();
-        total = data.total;
-
+        
         table.innerHTML = '';
+
+        if (data.total === 0) {
+            table.innerHTML = '<tr><td colspan="6">Nenhum produto cadastrado no sistema.</td></tr>';
+            return;
+        }
 
         data.products.forEach(product => {
             const row = document.createElement('tr');
@@ -106,15 +110,16 @@ const search_products = async () => {
         const query = document.getElementById('barra-pesquisa').value.trim()
         const response = await fetch(`/api/products/search?query=${query}`);
         const data = await response.json();
-        
-        table.innerHTML = ''; // Limpar a tabela antes de cada pesquisa
+        const products = Array.from(data.products);
 
-        if (!data.products || data.products.length === 0) {
+        table.innerHTML = ''; // Limpar a tabela antes de cada pesquisa
+        
+        if (products.length === 0) {
             table.innerHTML = '<tr><td colspan="6">Nenhum produto encontrado.</td></tr>';
             return;
         }
 
-        data.products.forEach(product => {
+        products.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td scope="col">${product.id}</td>
@@ -123,15 +128,14 @@ const search_products = async () => {
                 <td scope="col">${product.quantity}</td>
                 <td scope="col">${product.price}</td> 
                 <td scope="col">
-                    <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
-                    <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
-                    <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deletar-produto" type="button">R</button>
+                <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
+                <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
+                <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deletar-produto" type="button">R</button>
                 </td>
             `;
-            
             table.appendChild(row);
         });
-
+        
         attach_event_listeners('botao-adicionar-unidades', handleClick, {
             title_id : 'titulo-modal-adicionar-unidades',
             input_id : 'id-produto-adicionar-unidades',
@@ -154,12 +158,17 @@ const search_products = async () => {
 };
 
 /* Modal Deleta Categorias */
-document.getElementById('botao-deletar-categoria').addEventListener('click', () => {
-    const id = document.getElementById('select-deletar-categoria').value;
-    const desc = document.getElementById('select-deletar-categoria').textContent;
-    document.getElementById('titulo-modal-deletar-categoria').textContent = `Deletar ${desc}`;
-    document.getElementById('id-categoria-deletar').value = id;
-});
+
+try {
+    document.getElementById('botao-deletar-categoria').addEventListener('click', () => {
+        const id = document.getElementById('select-deletar-categoria').value;
+        const desc = document.getElementById('select-deletar-categoria').textContent;
+        document.getElementById('titulo-modal-deletar-categoria').textContent = `Deletar ${desc}`;
+        document.getElementById('id-categoria-deletar').value = id;
+    });
+} catch {
+    console.error('Botão de deletar categoria não encontrado');
+}
 
 /* Barra de Pesquisa */
 document.getElementById('botao-pesquisa').addEventListener('click', () => search_products())

@@ -109,14 +109,14 @@
 
 <div id="container-todos">
     <div id="botoes-estoque">
-        <button id="cadastrar-categoria" data-bs-toggle="collapse" data-bs-target="#collapse-cadcat" aria-expanded="false" aria-controls="collapse-cadcat" type="button">Cadastrar Categoria</button>
+        <button id="cadastrar-categoria" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadcat" aria-expanded="false" aria-controls="collapse-cadcat" type="button">Cadastrar Categoria</button>
         {% if categories %}
-        <button id="excluir-categoria" data-bs-toggle="collapse" data-bs-target="#collapse-delcat" aria-expanded="false" aria-controls="collapse-delcad" type="button">Deletar Categoria</button>
-        <button id="cadastrar-produto" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>
+        <button id="cadastrar-produto" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>
+        <button id="excluir-categoria" class="btn btn-danger" data-bs-toggle="collapse" data-bs-target="#collapse-delcat" aria-expanded="false" aria-controls="collapse-delcad" type="button">Deletar Categoria</button>
         {% endif %}
 
         <input id="barra-pesquisa" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
-        <button id="botao-pesquisa" type="button">Pesquisar</button>
+        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
     </div>
     
     <div id="container-collapses">
@@ -158,8 +158,8 @@
     </div>
     
     <div id="botoes-paginas">
-        <button id="anterior" type="button">anterior</button>
-        <button id="proxima" type="button">proxima</button>
+        <button id="anterior" class="btn btn-secondary" type="button">anterior</button>
+        <button id="proxima" class="btn btn-secondary" type="button">proxima</button>
     </div>
     <div id="tabela-estoque">
         <table class="table">

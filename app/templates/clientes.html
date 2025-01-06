@@ -5,13 +5,52 @@
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-content">
-    <h1>{{ pagetitle }}</h1>
+<h1>{{ pagetitle }}</h1>
 
+<div class="container-todos">
+    <div id="botoes-clientes">
+        <button id="cadastrar-cliente" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadcli">Cadastrar Cliente</button>
+        
+        <input id="barra-pesquisa" type="search" placeholder="Pesquisar Cliente (id, descrição, email, endereço)">
+        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
+    </div>
+
+    <div id="container-collapses">
+        <div class="collapse" id="collapse-cadcli">
+            <form action="{{url_for('customers.new_customer')}}" method="post" class="card card-body">
+                {{ new_customer.csrf_token }}
+                {{ new_customer.name.label(class="form-label") }} {{ new_customer.name(class="form-control", placeholder='Nome do cliente (Ex: João Henrique)') }}
+                {{ new_customer.email.label(class="form-label") }} {{ new_customer.email(class="form-control", placeholder='Email do Cliente (Ex: exemplo@gmail.com)') }}
+                {{ new_customer.address.label(class="form-label") }} {{ new_customer.address(class="form-control", placeholder='Endereço do Cliente (Ex: Rua João das Dores, Jd. Laranjeiras, 300)') }}
+                {{ new_customer.submit(class="btn btn-primary") }}
+            </form>
+        </div>
+    </div>
     
+    <div id="botoes-paginacao">
+        <button id="anterior" type="button">anterior</button>
+        <button id="proxima" type="button">proxima</button>
+    </div>
+
+    <div id="tabela-clientes">
+        <table class="table table-responsive">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Endereço</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="body-tabela-clientes">
+                <!-- Linhas de registro de produtos -->
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock%}
 
 {% block js_imports %}
-
+<script src="{{ url_for('static', filename='javascript/load_clients.js')}}"></script>
 {% endblock %}
