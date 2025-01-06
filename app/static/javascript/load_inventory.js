@@ -3,6 +3,26 @@ let current_page = 1;
 const per_page = 10;
 const table = document.getElementById('body-tabela-estoque')
 
+const populate_select = async () => {
+    try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        let categories = data.categories;
+
+        const select = document.getElementById('select-categoria-editar');
+        select.innerHTML = '';
+        
+        categories.forEach(category => {   
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.desc ;
+            select.appendChild(option); 
+        });
+    } catch (e) {
+        console.error('Erro ao carregar categorias - ', e);
+    };
+};
+
 const handleClick = (event, {title_id, input_id, prefix}) => {
     const id = event.target.dataset.id;
     const desc = event.target.dataset.desc;
@@ -11,10 +31,25 @@ const handleClick = (event, {title_id, input_id, prefix}) => {
     document.getElementById(input_id).value = id;
 };
 
-const attach_event_listeners = (class_name, handler, handler_args) => {
-    const delete_buttons = document.getElementsByClassName(class_name);
+const handleClickEdit = async (event, {prefix}) => {
+    const id = event.target.dataset.id;
+    const desc = event.target.dataset.desc;
+    const price = event.target.dataset.price;
+    const category_id = event.target.dataset.categoryid;
 
-    Array.from(delete_buttons).forEach(btn => {
+    document.getElementById('titulo-modal-editar-produto').textContent = `${prefix}`;
+    document.getElementById('id-produto-editar').value = id;
+    document.getElementById('desc-produto-editar').value = desc;
+    document.getElementById('preco-produto-editar').value = price;
+
+    await populate_select();
+    document.getElementById('select-categoria-editar').value = category_id;
+};
+
+const attach_event_listeners = (class_name, handler, handler_args) => {
+    const buttons = document.getElementsByClassName(class_name);
+
+    Array.from(buttons).forEach(btn => {
         btn.removeEventListener('click', handler);
         btn.addEventListener('click', (event) => handler(event, handler_args));
     });
@@ -38,7 +73,7 @@ const load_products = async (page) => {
                 <td scope="col">${product.price}</td> 
                 <td scope="col">
                     <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
-                    <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
+                    <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
                     <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deletar-produto" type="button">R</button>
                 </td>
             `;
@@ -51,10 +86,8 @@ const load_products = async (page) => {
             input_id : 'id-produto-adicionar',
             prefix : 'Adicionar'
         });
-        attach_event_listeners('botao-editar-produto', handleClick, {
-            title_id : 'titulo-modal-editar-produto',
-            input_id : 'id-produto-editar',
-            prefix : 'Editar'
+        attach_event_listeners('botao-editar-produto', handleClickEdit, { 
+            prefix : 'Editar Produto'
         });
         attach_event_listeners('botao-deletar-produto', handleClick, {
             title_id : 'titulo-modal-deletar-produto',
@@ -91,7 +124,7 @@ const search_products = async () => {
                 <td scope="col">${product.price}</td> 
                 <td scope="col">
                     <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
-                    <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
+                    <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
                     <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deletar-produto" type="button">R</button>
                 </td>
             `;

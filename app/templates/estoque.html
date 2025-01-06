@@ -54,7 +54,27 @@
 
 <!-- Editar Produto -->
 <section id="modal-editar-produto" class="modal" tabindex="-1">
-
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-editar-produto"></h5>
+            </div>
+            <form action="{{ url_for('api.edit_product') }}" method="post">
+                <div class="modal-body">
+                    {{ edit_product.csrf_token }}
+                    
+                    {{ edit_product.id() }}
+                    {{ edit_product.desc.label(class='form-label') }} {{ edit_product.desc(class='form-control', placeholder='Descrição do Produto')}}
+                    {{ edit_product.price.label(class='form-label') }} {{ edit_product.price(class='form-control', placeholder='Preço do Produto (Ex)') }}
+                    {{ edit_product.category.label(class='form-label') }} {{ edit_product.category(class='form-select') }}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ edit_product.submit(class='btn btn-primary') }}
+                </div>
+            </form>
+        </div>
+    </div>
 </section>
 
 <!-- Modal Deletar Produtos -->

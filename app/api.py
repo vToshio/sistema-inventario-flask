@@ -16,6 +16,7 @@ def get_products():
         {
             'id' : product.id,
             'desc' : product.desc.title(),
+            'category_id' : product.category.id,
             'category' : product.category.desc.title(),
             'quantity' : product.quantity,
             'price' : product.price
@@ -30,7 +31,25 @@ def get_products():
             'per_page' : per_page, 
             'total' : products.total, 
             'pages': products.pages
-        })
+        }
+    )
+
+@api.route('/api/categories', methods=['GET'])
+@login_required
+def get_categories():
+    categories = ProductCategory.query.all()
+
+    cat_list = [
+        {
+            'id' : category.id,
+            'desc' : category.desc
+        }
+        for category in categories
+    ]
+
+    return jsonify({
+        'categories' : cat_list
+    })
 
 
 @api.route('/api/products/search', methods=['GET'])
@@ -47,8 +66,9 @@ def search_products():
     prod_list = [
         {
             'id': product.id,
-            'desc' : product.desc,
-            'category' : product.category.desc,
+            'desc' : product.desc.title(),
+            'category_id' : product.category.id,
+            'category' : product.category.desc.title(),
             'quantity' : product.quantity,
             'price' : product.price
         }
@@ -84,6 +104,7 @@ def new_product():
 
 
 @api.route('/api/products/add-units', methods=['POST'])
+@login_required
 def add_units():
     form = AddUnitsForm()
     
@@ -109,8 +130,39 @@ def add_units():
                 flash(f'Erro no campo {field}: {e}')
     return redirect(url_for('views.inventory'))
 
+@api.route('/api/products/edit', methods=['POST'])
+@login_required
+def edit_product():
+    form = EditProductForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+        desc = form.desc.data
+        price = form.price.data
+        category_id = form.category.data
+
+        product = Product.query.filter_by(id=id).first()
+
+        try:
+            if not product:
+                flash(f'Produto "{desc}" não encontrado na base de dados')
+            else:
+                product.desc = desc
+                product.price = price
+                product.category_id = category_id
+                db.session.commit()
+                flash(f'Alterações no produto de ID {id} realizadas com sucesso!')
+        except Exception as e:
+            flash(f'Erro na alteração de dados do produto - {e}')
+    else:
+        for field, errors in form.errors.items():
+            for e in errors:
+                flash(f'Erro no campo {field}: {e}')
+    return redirect(url_for('views.inventory'))
+
 
 @api.route('/api/products/delete', methods=['POST'])
+@login_required
 def delete_product():
     form = DeleteProductForm()
     
@@ -138,6 +190,7 @@ def delete_product():
 
 
 @api.route('/api/categories/new', methods=['POST'])
+@login_required
 def new_category():
     form = NewCategoryForm()
 
@@ -164,6 +217,7 @@ def new_category():
 
 
 @api.route('/api/categories/delete', methods=['POST'])
+@login_required
 def delete_category():
     form = DeleteCategoryForm()
 

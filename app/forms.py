@@ -27,7 +27,16 @@ class AddUnitsForm(FlaskForm):
     submit = SubmitField('Adicionar Unidades')
 
 class EditProductForm(FlaskForm):
-    pass    
+    id = HiddenField(id='id-produto-editar', name='id-produto-editar')
+    desc = StringField('Descrição', id='desc-produto-editar', name='desc-produto-editar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=100)])
+    price = FloatField('Preço', id='preco-produto-editar', name='preco-produto-editar', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
+    category = SelectField('Categoria', id='select-categoria-editar', coerce=int, name='select-categoria-editar', choices=[], validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
+    submit = SubmitField('Editar Produto')
+
+    def __init__(self, *args, **kwargs):
+        super(EditProductForm, self).__init__(*args, **kwargs)
+        self.category.choices = [(cat.id, cat.desc) for cat in db.session.query(ProductCategory).all()]
+
 
 class DeleteProductForm(FlaskForm):
     id = HiddenField(id='id-produto-deletar', name='id-produto-deletar')
