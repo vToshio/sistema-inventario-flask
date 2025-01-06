@@ -14,7 +14,7 @@
                 <p>Tem certeza de que deseja deletar essa categoria? Ela será removida do banco de dados e não poderá ser recuperada.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('api.delete_category') }}" method="post">
+                <form action="{{ url_for('inventory.delete_category') }}" method="post">
                     {{ delete_category.csrf_token }}
                     {{ delete_category.id() }}
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
@@ -34,7 +34,7 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-adicionar-unidades">=</h5>
             </div>
-            <form action="{{ url_for('api.add_units') }}" method="post">
+            <form action="{{ url_for('inventory.add_units') }}" method="post">
                 <div class="modal-body">
                     <div>
                         {{ add_units.csrf_token }}
@@ -59,7 +59,7 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-editar-produto"></h5>
             </div>
-            <form action="{{ url_for('api.edit_product') }}" method="post">
+            <form action="{{ url_for('inventory.edit_product') }}" method="post">
                 <div class="modal-body">
                     {{ edit_product.csrf_token }}
                     
@@ -88,7 +88,7 @@
                 <p>Deseja mesmo remover esse produto? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('api.delete_product') }}" method="post">
+                <form action="{{ url_for('inventory.delete_product') }}" method="post">
                     {{ delete_product.csrf_token }}
                     {{ delete_product.id() }}
                     
@@ -122,7 +122,7 @@
     <div id="container-collapses">
         <!-- Cadastrar Categoria -->
         <div class="collapse" id="collapse-cadcat">
-            <form action="{{ url_for('api.new_category') }}" method="post" class="card card-body">
+            <form action="{{ url_for('inventory.new_category') }}" method="post" class="card card-body">
                 {{ new_category.csrf_token }}
                 {{ new_category.desc.label(class='form-label') }} {{ new_category.desc(class='form-control', placeholder='Nome da Categoria (Ex: Camiseta, Brinquedo, Livro...)') }}
                 {{ new_category.submit(class='btn btn-primary')}}
@@ -145,7 +145,7 @@
 
         <!-- Cadastrar Produtos -->
         <div class="collapse" id="collapse-cadprod">
-            <form action="{{ url_for('api.new_product') }}" method="post" class="card card-body">
+            <form action="{{ url_for('inventory.new_product') }}" method="post" class="card card-body">
                 {{ new_product.csrf_token }}
                 {{ new_product.desc.label(class="form-label") }} {{ new_product.desc(class="form-control", placeholder="Nome do produto (Ex: Camiseta Verde, Calça Jeans...)")}}
                 {{ new_product.price.label(class="form-label") }} {{ new_product.price(class="form-control", placeholder="Número Decimal (Ex: 54.90, 99.99, 34.90...)") }} 
@@ -182,5 +182,5 @@
 {% endblock%}
 
 {% block js_imports %}
-<script src="{{ url_for('static', filename='./javascript/load_inventory.js') }}"></script>
+<script src="{{ url_for('static', filename='/javascript/load_inventory.js') }}"></script>
 {% endblock%}

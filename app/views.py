@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, get_flashed_messages, session, request
 from flask_bcrypt import Bcrypt
-from helpers import login_required
-from forms import *
-from models import *
+from app.helpers import login_required
+from app.inventory.forms import *
+from app.models import *
 
 views = Blueprint('views', __name__)
 bcrypt = Bcrypt()

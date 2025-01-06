@@ -1,11 +1,11 @@
 from flask import Blueprint, redirect, jsonify, url_for, flash, request, session
-from models import db, Product, ProductCategory
-from helpers import login_required
-from forms import *
+from app.models import db, Product, ProductCategory
+from app.helpers import login_required
+from app.inventory.forms import *
 
-api = Blueprint('api', __name__)
+inventory = Blueprint('inventory', __name__)
 
-@api.route('/api/products', methods=['GET'])
+@inventory.route('/api/products', methods=['GET'])
 @login_required
 def get_products():
     page = request.args.get('page', default=1, type=int)
@@ -34,7 +34,7 @@ def get_products():
         }
     )
 
-@api.route('/api/categories', methods=['GET'])
+@inventory.route('/api/categories', methods=['GET'])
 @login_required
 def get_categories():
     categories = ProductCategory.query.all()
@@ -52,15 +52,15 @@ def get_categories():
     })
 
 
-@api.route('/api/products/search', methods=['GET'])
+@inventory.route('/api/products/search', methods=['GET'])
 @login_required
 def search_products():
     query = request.args.get('query', default='').lower()
 
     products = Product.query.join(ProductCategory).filter(
         ((Product.id == query) |
-        (Product.desc == query) |
-        (ProductCategory.desc == query))
+        (Product.desc.ilike(query)) |
+        (ProductCategory.ilike(query)))
     ).all()
 
     prod_list = [
@@ -78,7 +78,7 @@ def search_products():
     return jsonify({'products' : prod_list})
 
 
-@api.route('/api/products/new', methods=['POST'])
+@inventory.route('/api/products/new', methods=['POST'])
 @login_required
 def new_product():
     form = NewProductForm()
@@ -103,7 +103,7 @@ def new_product():
     return redirect(url_for('views.inventory'))
 
 
-@api.route('/api/products/add-units', methods=['POST'])
+@inventory.route('/api/products/add-units', methods=['POST'])
 @login_required
 def add_units():
     form = AddUnitsForm()
@@ -130,7 +130,7 @@ def add_units():
                 flash(f'Erro no campo {field}: {e}')
     return redirect(url_for('views.inventory'))
 
-@api.route('/api/products/edit', methods=['POST'])
+@inventory.route('/api/products/edit', methods=['POST'])
 @login_required
 def edit_product():
     form = EditProductForm()
@@ -161,7 +161,7 @@ def edit_product():
     return redirect(url_for('views.inventory'))
 
 
-@api.route('/api/products/delete', methods=['POST'])
+@inventory.route('/api/products/delete', methods=['POST'])
 @login_required
 def delete_product():
     form = DeleteProductForm()
@@ -189,7 +189,7 @@ def delete_product():
     return redirect(url_for('views.inventory'))
 
 
-@api.route('/api/categories/new', methods=['POST'])
+@inventory.route('/api/categories/new', methods=['POST'])
 @login_required
 def new_category():
     form = NewCategoryForm()
@@ -216,7 +216,7 @@ def new_category():
     return redirect(url_for('views.inventory'))
 
 
-@api.route('/api/categories/delete', methods=['POST'])
+@inventory.route('/api/categories/delete', methods=['POST'])
 @login_required
 def delete_category():
     form = DeleteCategoryForm()

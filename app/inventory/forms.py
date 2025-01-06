@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, IntegerField, FloatField, SelectField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Length
-from models import db, ProductCategory
+from app.models import db, ProductCategory
 
 DATA_REQUIRED_MESSAGE = 'O preenchimento deste campo é obrigatório.'
 

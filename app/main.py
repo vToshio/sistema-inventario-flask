@@ -1,14 +1,14 @@
 from flask import Flask
 from datetime import datetime
-from models import db, User
-from views import views, bcrypt
-from helpers import csrf
-from api import api
+from app.models import db, User
+from app.views import views, bcrypt
+from app.helpers import csrf
+from app.inventory.routes import inventory
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.register_blueprint(views)
-    app.register_blueprint(api)
+    app.register_blueprint(inventory)
     app.config.from_pyfile('config.py')
     
     with app.app_context():
@@ -30,7 +30,3 @@ def create_app() -> Flask:
             db.session.commit()
 
     return app
-
-if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True)
