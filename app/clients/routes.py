@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, jsonify, flash, get_flashed_messages, redirect, url_for, get_flashed_messages, session, request
-from app.helpers import login_required
+from app.helpers import login_required, flash_messages
 from app.models import Customer, db
 from app.clients.forms import *
 
@@ -8,8 +8,22 @@ customers = Blueprint('customers', __name__)
 @customers.route('/sistema/home/clientes', methods=['GET'])
 @login_required
 def render_page():
-    customers = NewCustomerForm()
-    return render_template('clientes.html', pagetitle='Clientes', new_customer=customers, session=session)
+    customers = Customer.query.first()
+
+    new_customer = NewCustomerForm()
+    delete_customer = DeleteCustomerForm()
+    edit_customer = EditCustomerForm()
+    return render_template(
+        'clientes.html',
+        pagetitle='Clientes', 
+        new_customer=new_customer, 
+        edit_customer=edit_customer, 
+        delete_customer=delete_customer, 
+        messages=get_flashed_messages(),
+        customers=customers,
+        session=session
+    )
+
 
 @customers.route('/api/customers', methods=['GET'])
 @login_required
@@ -39,17 +53,40 @@ def get_customers():
     )
     
 
+@customers.route('/api/customers/<int:id>', methods=['GET'])
+@login_required
+def get_customer(id: int):
+    if not isinstance(id, int):
+        flash('O ID deve ser um número inteiro para realizar uma pesquisa por ID.')
+        return redirect(url_for('customers.render_page'))
+    
+    customer = Customer.query.filter_by(id=id).first()
+    if not customer:
+       flash('Cliente ainda não cadastrado no banco de dados.')
+       return redirect(url_for('customers.render_page'))
+
+    return jsonify(
+        {
+            'name' : str(customer.name).title(),
+            'email' : customer.email,
+            'address' : str(customer.address).title()
+        }
+    )
+
+
 @customers.route('/api/customers/search', methods=['GET'])
 @login_required
 def search_customers():
-    query = request.args.get('query').lower()
+    query = request.args.get('query').strip()
 
     clients = Customer.query.filter(
         ((Customer.id == query) |
-         (Customer.name == query) |
+         (Customer.name == query.lower()) |
          (Customer.email == query) |
-         (Customer.address == query))
+         (Customer.address == query.lower()))
     ).all()
+
+    print(clients)
 
     customers_list = [
         {
@@ -82,17 +119,56 @@ def new_customer():
             db.session.rollback()
             flash(f'Erro no cadastro de cliente - {e}')        
     else:
-        for field, errors in form.errors.items():
-            for e in errors:
-                flash(f'Erro no campo {field}: {e}')
+        flash_messages(form.errors)
     return redirect(url_for('customers.render_page'))
+
 
 @customers.route('/api/customers/edit', methods=['POST'])
 @login_required
-def edit_client_data():
-    pass
+def edit_customer():
+    form = EditCustomerForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+        customer = Customer.query.filter_by(id=id).first()
+        if not customer:
+            flash('Cliente não cadastrado no banco de dados.')
+        else:
+            try:
+                customer.name = str(form.name.data).strip().lower()
+                customer.address = str(form.address.data).strip().lower()
+                customer.email = form.email.data
+                db.session.commit()
+                flash(f'Edição dos dados do cliente de ID {id} realizada com sucesso!')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Erro na edição de dados do cliente - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('customers.render_page'))
+
 
 @customers.route('/api/customers/delete', methods=['POST'])
 @login_required
-def delete_client():
-    pass
+def delete_customer():
+    form = DeleteCustomerForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+
+        customer = Customer.query.filter_by(id=id).first()
+
+        if not customer:
+            flash('Cliente ainda não registrado.')
+        else:
+            try:
+                name = str(customer.name).title()
+                db.session.query(Customer).filter_by(id=id).delete()
+                db.session.commit()
+                flash(f'Cliente "{name}" deletado com sucesso!')    
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Cliente não encontrado no banco de dados - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('customers.render_page'))

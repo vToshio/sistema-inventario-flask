@@ -1,7 +1,55 @@
 {% extends "base.html" %}
 
 {% block modal %}
+<!-- Modal Editar Cliente-->
+{% if customers %}
+<section id="modal-editar-cliente" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-editar-cliente" class="modal-title"></h5>
+            </div>
+            
+            <form action="{{ url_for('customers.edit_customer') }}" method="post">
+                {{ edit_customer.csrf_token }}
+                {{ edit_customer.id() }}
+                <div class="modal-body">
+                    {{ edit_customer.name.label(class="form-label")  }} {{ edit_customer.name(class="form-control")  }}
+                    {{ edit_customer.email.label(class="form-label")  }} {{ edit_customer.email(class="form-control")  }}
+                    {{ edit_customer.address.label(class="form-label")  }} {{ edit_customer.address(class="form-control")  }}
+                </div>
+                <div class="modal-footer">
+            
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ delete_customer.submit(class="btn btn-primary")}}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
 
+<!-- Modal Deletar Cliente-->
+<section id="modal-deletar-cliente" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-deletar-cliente" class="modal-title"></h5>
+            </div>
+            <div class="modal-body">
+                <p>Você deseja realmente excluir esse cliente? Ele será removido do banco de dados e não poderá ser recuperado.</p>
+            </div>
+            <div class="modal-footer">
+                <form action="{{ url_for('customers.delete_customer') }}" method="post">
+                    {{ delete_customer.csrf_token }}
+                    {{ delete_customer.id() }}
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ delete_customer.submit(class="btn btn-danger")}}
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
 {% endblock %}
 
 {% block content %}

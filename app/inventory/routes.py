@@ -90,12 +90,12 @@ def get_categories():
 @inventory.route('/api/products/search', methods=['GET'])
 @login_required
 def search_products():
-    query = request.args.get('query', default='').lower()
+    query = request.args.get('query', default='')
 
     products = Product.query.join(ProductCategory).filter(
         ((Product.id == query) |
-        (Product.desc == query) |
-        (ProductCategory == query))
+        (Product.desc == query.lower()) |
+        (ProductCategory.category.desc == query.lower()))
     ).all()
 
     prod_list = [

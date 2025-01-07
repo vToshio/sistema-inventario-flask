@@ -31,7 +31,7 @@ const handleClick = (event, {title_id, input_id, prefix}) => {
     document.getElementById(input_id).value = id;
 };
 
-const handleClickEdit = async (event, {prefix}) => {
+const handleClickEditProduct = async (event, {prefix}) => {
     const id = event.target.dataset.id;
     const desc = event.target.dataset.desc;
     const price = event.target.dataset.price;

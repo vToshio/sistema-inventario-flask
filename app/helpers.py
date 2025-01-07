@@ -1,18 +1,17 @@
-from flask import flash, redirect, url_for, session
+from flask import flash, redirect, flash, url_for, session
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import model
+from typing import List, Type
 from functools import wraps
 
 bcrypt = Bcrypt()
 csrf = CSRFProtect()
 
-def get_object(model: model, **kwargs):
-    obj = model.query.filter(kwargs).first()
-    if not obj:
-        flash(f'{model.__name__} não encontrado.')
-        return None
-    return obj
+def flash_messages(form_errors: List[Type[tuple]]):
+    for field, errors in form_errors.items:
+        for e in errors:
+            flash(f'Erro no campo {field} - {e}')
 
 def login_required(func):
     '''

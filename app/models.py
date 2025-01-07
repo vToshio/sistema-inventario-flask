@@ -85,7 +85,7 @@ class Customer(db.Model):
     __tablename__ = 'customers'   
     id = db.Column('id', db.Integer(), primary_key=True, nullable=False)
     name = db.Column('name', db.String(50), nullable=False) 
-    email = db.Column('email', db.String(50), nullable=False)
+    email = db.Column('email', db.String(50), unique=True, nullable=False)
     address = db.Column('address', db.String(100), nullable=False)
     
     sales = db.relationship('Sale', back_populates='customer', foreign_keys='Sale.customer_id')

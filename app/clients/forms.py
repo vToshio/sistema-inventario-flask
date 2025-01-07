@@ -8,3 +8,14 @@ class NewCustomerForm(FlaskForm):
     email = EmailField('Email', id='email-cadastrar-cliente',name='email-cadastrar-cliente', validators=[DataRequired(), Length(max=50)])
     address = StringField('Endereço', id='endereco-cadastrar-cliente', name='endereco-cadastrar-cliente', validators=[DataRequired(), Length(max=100)])
     submit = SubmitField('Cadastrar Cliente')
+
+class DeleteCustomerForm(FlaskForm):
+    id = HiddenField(id='id-deletar-cliente', name='id-deletar-cliente')
+    submit = SubmitField('Deletar Cliente')
+
+class EditCustomerForm(FlaskForm):
+    id = HiddenField(id='id-editar-cliente', name='id-editar-cliente')
+    name = StringField('Nome do Cliente', id='nome-editar-cliente', name='nome-editar-cliente', validators=[DataRequired(), Length(max=30)])
+    email = EmailField('Email', id='email-editar-cliente',name='email-editar-cliente', validators=[DataRequired(), Length(max=50)])
+    address = StringField('Endereço', id='endereco-editar-cliente', name='endereco-editar-cliente', validators=[DataRequired(), Length(max=100)])
+    submit = SubmitField('Editar Cliente')
