@@ -38,12 +38,14 @@ def login():
             found_user = User.query.filter(User.username == username).first()
             if found_user:
                 if bcrypt.check_password_hash(found_user.password, passwd):
+                    role = UserRole.query.filter_by(id=found_user.role_id).first()
                     session['logged_user'] = username
-                    session['user_role'] = found_user.role
+                    session['user_role'] = role.desc
+                    print(session['user_role'], session['logged_user'])
                     return redirect(url_for('views.home'))
-                flash('Senha incorreta.', 'error')
+                flash('Senha incorreta.')
             else:
-                flash('Usuário ainda não cadastrado.', 'error')
+                flash('Usuário ainda não cadastrado.')
             return redirect(url_for('views.login', next=next))
         
         # If GET HTTP

@@ -29,7 +29,7 @@
             <ul>
                 <!-- Divisoria 2 -->
                 {% if session['user_role'] in ['master', 'admin'] %}
-                <li><a href="">Usuários</a></li>
+                <li><a href="{{ url_for('users.render_page') }}">Usuários</a></li>
                 {% endif %}
                 <a href="{{ url_for('views.logout') }}">Logout</a>
             </ul>

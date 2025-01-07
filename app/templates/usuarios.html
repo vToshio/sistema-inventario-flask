@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block modal %}
+{% endblock %}
+
+{% block content %}
+<h1>{{ pagetitle }}</h1>
+
+<div id="container-todos">
+    <div id="botoes-estoque">
+        <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-caduser" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Categoria</button>
+        
+        <input id="barra-pesquisa" type="search" placeholder="Pesquisar Usuário (id, nome, username, cargo, email)">
+        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
+    </div>
+    
+    <div id="container-collapses">
+        <!-- Cadastrar Usuário -->
+        <div class="collapse" id="collapse-caduser">
+            <form action="#" method="" class="card card-body">
+                
+            </form>
+        </div>
+    </div>
+    
+    <div id="botoes-paginas">
+        <button id="anterior" class="btn btn-secondary" type="button">anterior</button>
+        <button id="proxima" class="btn btn-secondary" type="button">proxima</button>
+    </div>
+    <div id="tabela-usuarios">
+        <table class="table">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Cargo</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Data de Criação</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="body-tabela-estoque" class="table-striped">
+                <!-- Linhas de registro de produtos -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_imports %}
+<script src="{{ url_for('static', filename='javascript/load_users.js') }}"></script>
+{% endblock %}

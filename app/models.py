@@ -17,7 +17,7 @@ class User(db.Model):
     '''
     __tablename__ = 'users'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
-    role = db.Column('role', db.String(6), nullable=False)
+    role_id = db.Column('role', db.Integer(), db.ForeignKey('roles.id'), nullable=False)
     name = db.Column('name', db.String(30), nullable=False)
     username = db.Column('username', db.String(20), nullable=False, unique=True)
     password = db.Column('password', db.String(100), nullable=False)
@@ -25,9 +25,20 @@ class User(db.Model):
     date_created = db.Column('date_created', db.Date, default=datetime.now, nullable=False)
 
     sales = db.relationship('Sale', back_populates='salesman', foreign_keys='Sale.salesman_id')
-   
+    roles = db.relationship('UserRole', back_populates='users', foreign_keys=[role_id])
+
     def __repr__(self):
         return f'<User: {self.username}/{self.id}>'
+
+class UserRole(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True)
+    desc = db.Column('desc', db.String(20), unique=True, nullable=False)
+
+    users = db.relationship('User', back_populates='roles', foreign_keys='User.role_id')
+
+    def __repr__(self):
+        return f'<UserRole {self.id}: {self.desc}>'
 
 class Product(db.Model):
     '''
