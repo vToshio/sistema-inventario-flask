@@ -77,14 +77,12 @@ def get_categories():
     cat_list = [
         {
             'id' : category.id,
-            'desc' : category.desc
+            'desc' : category.desc.title()
         }
         for category in categories
     ]
 
-    return jsonify({
-        'categories' : cat_list
-    })
+    return jsonify({'categories' : cat_list})
 
 
 @inventory.route('/api/products/search', methods=['GET'])
@@ -95,7 +93,9 @@ def search_products():
     products = Product.query.join(ProductCategory).filter(
         ((Product.id == query) |
         (Product.desc == query.lower()) |
-        (ProductCategory.category.desc == query.lower()))
+        (ProductCategory.desc == query.lower()) |
+        (Product.price == query) |
+        (Product.quantity == query))
     ).all()
 
     prod_list = [
@@ -119,15 +119,20 @@ def new_product():
     form = NewProductForm()
     
     if form.validate_on_submit():
-        desc = str(form.desc.data).lower().strip()
-        category = int(form.category_id.data)
-        price = float(form.price.data)
+        desc = form.desc.data
+        category = form.category_id.data
+        price = form.price.data
 
         if Product.query.filter_by(desc=desc).first():
             flash(f'Produto com o nome "{desc}" já cadastrado.')
         else:
             try:
-                db.session.add(Product(desc=desc, category_id=category, price=price, quantity=0))
+                db.session.add(Product(
+                    desc = str(desc).strip().lower(), 
+                    category_id = int(category), 
+                    price = float(price), 
+                    quantity = 0)
+                )
                 db.session.commit()
                 flash(f'Produto "{desc}" cadastrado com sucesso!')
             except Exception as e:
