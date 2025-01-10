@@ -1,5 +1,7 @@
-const table = document.getElementById('body-tabela-usuarios')
+const table = document.getElementById('body-tabela-usuarios');
+const role = sessionStorage.getItem('user_role');
 
+/*
 const load_users = async () => {
     const response = await fetch('/api/users/get');
     const data = await response.json();
@@ -27,7 +29,7 @@ const load_users = async () => {
         table.appendChild(row);
     });
 };
-
+*/
 
 const search_users = async () => {
     const query = document.getElementById('barra-pesquisa').value;

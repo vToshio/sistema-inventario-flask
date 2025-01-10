@@ -21,7 +21,7 @@ class User(db.Model):
     name = db.Column('name', db.String(30), nullable=False)
     username = db.Column('username', db.String(20), nullable=False, unique=True)
     password = db.Column('password', db.String(100), nullable=False)
-    email = db.Column('email', db.String(50), unique=True)
+    email = db.Column('email', db.String(50), nullable=False, unique=True)
     date_created = db.Column('date_created', db.Date, default=datetime.now, nullable=False)
 
     sales = db.relationship('Sale', back_populates='salesman', foreign_keys='Sale.salesman_id')

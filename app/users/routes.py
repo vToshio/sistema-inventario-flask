@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, jsonify, get_flashed_messages, flash, redirect, url_for, request, session
 from app.models import db, User, UserRole
 from app.users.forms import * 
-from app.helpers import login_required, adm_required
+from app.helpers import login_required, adm_required, flash_messages, bcrypt
 
 users = Blueprint('users', __name__)
 
@@ -9,13 +9,17 @@ users = Blueprint('users', __name__)
 @login_required
 @adm_required
 def render_page():
+    new_users = NewUserForm()
+    users = User.query.all()
     messages = get_flashed_messages()
     
     return render_template(
         'usuarios.html', 
         pagetitle = 'Usuários',
+        new_users=new_users,
         messages = messages,
-        session = session
+        session = session,
+        users = users
     )
 
 
@@ -60,7 +64,7 @@ def search_users():
         {
             'id' : user.id,
             'name' : str(user.name).title(),
-            'username' : user.name,
+            'username' : user.username,
             'role' : str(user.roles.desc).title(),
             'email' : user.email,
             'date_created' : user.date_created
@@ -74,7 +78,40 @@ def search_users():
 @login_required
 @adm_required
 def new_user():
-    pass
+    form = NewUserForm()
+
+    if form.validate_on_submit():
+        name = str(form.name.data).strip().lower()
+        username = str(form.username.data).strip()
+        role_id = form.role_id.data
+        passwd = str(form.password.data).strip()
+        confirm_passwd = str(form.confirm_password.data).strip()
+        email = str(form.email.data).strip()
+
+        
+        try:
+            if User.query.filter_by(email=email).first():
+                flash(f'Usuário já cadastrado com o email "{email}".')
+            elif User.query.filter_by(username=username).first():
+                flash(f'Já existe usuário cadastrado com o username "{username}"')
+            elif passwd != confirm_passwd: 
+                flash(f'Os campos de senha não são idênticos.')
+            else:
+                db.session.add(User(
+                    name=name, 
+                    username=username, 
+                    email=email, 
+                    role_id=role_id, 
+                    password=bcrypt.generate_password_hash(passwd).decode('utf-8'))
+                )
+                db.session.commit()
+                flash(f'Usuário "{username}" criado com sucesso!')
+        except Exception as e:
+            flash(f'Erro no cadastro de usuário - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('users.render_page'))
+        
 
 @users.route('/api/users/edit', methods=['POST'])
 @login_required

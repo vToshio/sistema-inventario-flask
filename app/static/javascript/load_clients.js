@@ -99,7 +99,7 @@ const search_clients = async () => {
                     <button class="botao-editar-cliente btn btn-secondary" data-id="${client.id}">E</button>
                     <button class="botao-deletar-cliente btn btn-danger" data-id="${client.id}">D</button>
                 </td>
-            `;console.log(customers)
+            `;
             table.appendChild(row);
         });
 

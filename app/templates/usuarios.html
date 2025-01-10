@@ -8,7 +8,7 @@
 
 <div id="container-todos">
     <div id="botoes-estoque">
-        <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-caduser" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Categoria</button>
+        <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-caduser" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Usuário</button>
         
         <input id="barra-pesquisa" type="search" placeholder="Pesquisar Usuário (id, nome, username, cargo, email)">
         <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
@@ -17,8 +17,15 @@
     <div id="container-collapses">
         <!-- Cadastrar Usuário -->
         <div class="collapse" id="collapse-caduser">
-            <form action="#" method="" class="card card-body">
-                
+            <form action="{{ url_for('users.new_user') }}" method="post" class="card card-body">
+                {{ new_users.csrf_token }}
+                {{ new_users.name.label(class="form-label")}} {{ new_users.name(class="form-control", placeholder="Nome completo do novo usuário.") }}
+                {{ new_users.username.label(class="form-label") }} {{ new_users.username(class="form-control", placeholder="Nome de acesso do usuário.") }}
+                {{ new_users.role_id.label(class="form-label") }} {{ new_users.role_id(class="form-select") }}
+                {{ new_users.email.label(class="form-label")}} {{ new_users.email(class="form-control", placeholder="exemplo@gmail.com")}}
+                {{ new_users.password.label(class="form-label") }} {{ new_users.password(class="form-control", placeholder="Senha de Acesso.") }}
+                {{ new_users.confirm_password.label(class="form-label") }} {{ new_users.confirm_password(class="form-control", placeholder="Confirmar Senha de Acesso.") }}
+                {{ new_users.submit(class="btn btn-primary") }}
             </form>
         </div>
     </div>
@@ -38,12 +45,35 @@
             </thead>
             <tbody id="body-tabela-usuarios" class="table-striped">
                 <!-- Linhas de registro de usuários -->
+                {% if not users %}
+                <tr><td colspan="7">Nenhum usuário cadastrado no banco de dados</td></tr>
+                {% else %}
+                    {% for user in users %}
+                    <tr class="text-center">
+                        <td scope="col">{{ user.id }}</td>
+                        <td scope="col">{{ user.name }}</td>
+                        <td scope="col">{{ user.username }}</td>
+                        <td scope="col">{{ user.roles.desc }}</td>
+                        <td scope="col">{{ user.email }}</td>
+                        <td scope="col">{{ user.date_created }}</td>
+                        {% if user.username == 'master' or (session['logged_user'] != user.username and user.roles.desc == 'admin') %}
+                        <td scope="col">---</tr>
+                        {% else %}
+                        <td scope="col">
+                            <button class="botao-mudar-senha btn btn-secondary" type="button">P</button>
+                            <button class="botao-editar-usuario btn btn-secondary" type="button">E</button>
+                            <button class="botao-deletar-usuario btn btn-danger" type="button">D</button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% endif %}    
             </tbody>
         </table>
     </div>
 </div>
 {% endblock %}
 
-{% block js_imports %}
+{% block js_imports %} 
 <script src="{{ url_for('static', filename='javascript/load_users.js') }}"></script>
 {% endblock %}

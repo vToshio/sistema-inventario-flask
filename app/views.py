@@ -36,23 +36,21 @@ def login():
                 passwd = str(form.password.data)
         
             found_user = User.query.filter(User.username == username).first()
-            if found_user:
-                if bcrypt.check_password_hash(found_user.password, passwd):
-                    role = UserRole.query.filter_by(id=found_user.role_id).first()
-                    session['logged_user'] = username
-                    session['user_role'] = role.desc
-                    print(session['user_role'], session['logged_user'])
-                    return redirect(url_for('views.home'))
-                flash('Senha incorreta.')
-            else:
-                flash('Usuário ainda não cadastrado.')
+            if found_user and bcrypt.check_password_hash(found_user.password, passwd):
+                role = UserRole.query.filter_by(id=found_user.role_id).first()
+                session['logged_user'] = username
+                session['user_role'] = role.desc
+                return redirect(url_for('views.home'))
+            
+            flash('Usuário ou senha inválidos.')
             return redirect(url_for('views.login', next=next))
         
         # If GET HTTP
         form = LoginForm()
         return render_template('login.html', next=url_for('views.login'), form=form, messages=get_flashed_messages(with_categories=True))
     except Exception as e:
-        return redirect(url_for('views.error', error=e))
+        flash(f'{e}')
+        return redirect(url_for('views.login'))
 
 @views.route('/sistema/logout', methods=['GET'])
 @login_required
