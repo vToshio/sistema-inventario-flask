@@ -51,18 +51,20 @@
                     {% for user in users %}
                     <tr class="text-center">
                         <td scope="col">{{ user.id }}</td>
-                        <td scope="col">{{ user.name }}</td>
+                        <td scope="col">{{ user.name.title() }}</td>
                         <td scope="col">{{ user.username }}</td>
-                        <td scope="col">{{ user.roles.desc }}</td>
+                        <td scope="col">{{ user.roles.desc.title() }}</td>
                         <td scope="col">{{ user.email }}</td>
                         <td scope="col">{{ user.date_created }}</td>
-                        {% if user.username == 'master' or (session['logged_user'] != user.username and user.roles.desc == 'admin') %}
+                        {% if user.username == 'master' or (session['logged_user'] not in [user.username, 'master'] and user.roles.desc == 'admin') %}
                         <td scope="col">---</tr>
                         {% else %}
                         <td scope="col">
                             <button class="botao-mudar-senha btn btn-secondary" type="button">P</button>
                             <button class="botao-editar-usuario btn btn-secondary" type="button">E</button>
+                            {% if session['logged_user'] != user.username %}
                             <button class="botao-deletar-usuario btn btn-danger" type="button">D</button>
+                            {% endif %}
                         </td>
                         {% endif %}
                     </tr>
