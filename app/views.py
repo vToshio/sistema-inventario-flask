@@ -26,7 +26,7 @@ def login():
     - POST: valida os dados fornecidos pelo formulário de Login 
     '''
     try:
-        # If POST HTTP
+        # POST
         if request.method == 'POST':
             form = LoginForm()
 
@@ -45,7 +45,7 @@ def login():
             flash('Usuário ou senha inválidos.')
             return redirect(url_for('views.login', next=next))
         
-        # If GET HTTP
+        # GET
         form = LoginForm()
         return render_template('login.html', next=url_for('views.login'), form=form, messages=get_flashed_messages(with_categories=True))
     except Exception as e:
@@ -74,18 +74,3 @@ def home():
     - GET: renderiza a página Home do sistema.
     '''
     return render_template('home.html', pagetitle='Home', session=session)
-
-@views.route('/sistema/home/vendas')
-@login_required
-def sales():
-    return render_template('vendas.html', pagetitle='Vendas', session=session)
-
-@views.route('/sistema/home/users')
-@login_required
-def users_config():
-    pass
-
-@views.route('/sistema/home/profile/<username>')
-@login_required
-def profile(username: str):
-    pass

@@ -1,6 +1,73 @@
 {% extends "base.html" %}
 
 {% block modal %}
+<section id="modal-mudar-senha" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-mudar-senha"></h5>
+            </div>
+            <form action="{{ url_for('users.change_password') }}" method="post">
+                {{ change_passwd.csrf_token }}
+                {{ change_passwd.id() }}
+                <div class="modal-body">
+                    {{ change_passwd.new_password.label(class="form-label") }} {{ change_passwd.new_password(class="form-control", placeholder="Insira a nova senha deste usuário.") }}
+                    {{ change_passwd.confirm.label(class="form-label") }} {{ change_passwd.confirm(class="form-control", placeholder="Confirme a senha do campo anterior.") }}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+                    {{ change_passwd.submit(class="btn btn-danger") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section id="modal-editar-usuario" class="modal" tabindex="-1">
+    <section class="modal-dialog">
+        <section class="modal-content">
+            <section class="modal-header">
+                <h5 id="titulo-modal-editar-usuario"></h5>
+            </section>
+            <form action="{{ url_for('users.edit_user') }}" method="post">
+                {{ edit_user.csrf_token }}
+                {{ edit_user.id() }}
+                <section class="modal-body">
+                    {{ edit_user.name.label(class="form-label") }} {{ edit_user.name(class="form-control", placeholder="Nome Completo do Usuário.") }}
+                    {{ edit_user.username.label(class="form-label") }} {{ edit_user.username(class="form-control", placeholder="Nome de Acesso do Usuário.")}}
+                    {{ edit_user.role_id.label(class="form-label") }} {{ edit_user.role_id(class="form-select") }}
+                    {{ edit_user.email.label(class="form-label") }} {{ edit_user.email(class="form-control", placeholder="exemplo@email.com") }}
+                </section>
+                <section class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ edit_user.submit(class="btn btn-primary")}}
+                </section>
+            </form>
+        </section>
+    </section>
+</section>
+
+<section id="modal-deletar-usuario" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-deletar-usuario"></h5>
+            </div>
+            <div class="modal-body">
+                <p>Você quer mesmo deletar este usuário? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
+            </div>
+            <div class="modal-footer">
+                <form action="{{ url_for('users.delete_user') }}" method="post">
+                    {{  delete_user.csrf_token }}
+                    {{ delete_user.id() }}
+
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ delete_user.submit(class="btn btn-danger")}}
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block content %}
@@ -9,9 +76,6 @@
 <div id="container-todos">
     <div id="botoes-estoque">
         <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-caduser" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Usuário</button>
-        
-        <input id="barra-pesquisa" type="search" placeholder="Pesquisar Usuário (id, nome, username, cargo, email)">
-        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
     </div>
     
     <div id="container-collapses">
@@ -60,10 +124,10 @@
                         <td scope="col">---</tr>
                         {% else %}
                         <td scope="col">
-                            <button class="botao-mudar-senha btn btn-secondary" type="button">P</button>
-                            <button class="botao-editar-usuario btn btn-secondary" type="button">E</button>
+                            <button class="botao-mudar-senha btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-mudar-senha" data-id="{{ user.id }}" type="button">P</button>
+                            <button class="botao-editar-usuario btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-editar-usuario" data-id="{{ user.id }}" type="button">E</button>
                             {% if session['logged_user'] != user.username %}
-                            <button class="botao-deletar-usuario btn btn-danger" type="button">D</button>
+                            <button class="botao-deletar-usuario btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-deletar-usuario" data-id="{{ user.id }}" data-username="{{ user.username }}" type="button">D</button>
                             {% endif %}
                         </td>
                         {% endif %}
@@ -77,5 +141,5 @@
 {% endblock %}
 
 {% block js_imports %} 
-<script src="{{ url_for('static', filename='javascript/load_users.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/users.js') }}"></script>
 {% endblock %}

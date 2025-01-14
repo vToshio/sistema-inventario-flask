@@ -10,69 +10,39 @@ users = Blueprint('users', __name__)
 @adm_required
 def render_page():
     new_users = NewUserForm()
+    change_passwd = ChangePasswdForm()
+    edit_user = EditUserForm()
+    delete_user = DeleteUserForm()
     users = User.query.all()
     messages = get_flashed_messages()
     
     return render_template(
         'usuarios.html', 
         pagetitle = 'Usuários',
-        new_users=new_users,
+        new_users = new_users,
+        change_passwd = change_passwd,
+        edit_user = edit_user,
+        delete_user = delete_user,
         messages = messages,
         session = session,
         users = users
     )
 
 
-@users.route('/api/users/get', methods=['GET'])
+@users.route('/api/users/<int:id>', methods=['GET'])
 @login_required
 @adm_required
-def get_users():
-    users = User.query.all()
+def get_user(id: int):
+    user = User.query.filter_by(id=id).first()
 
-    users_list = [
-        {
-            'id' : user.id,
-            'name' : str(user.name).title(),
-            'username' : user.name,
-            'role' : str(user.roles.desc).title(),
-            'email' : user.email,
-            'date_created' : user.date_created
-        }
-        for user in users
-    ]
-    
     return jsonify({
-        'users' : users_list,
-        'total' : len(users_list)
+        'id' : user.id,
+        'name' : str(user.name).title(),
+        'username' : user.username,
+        'role_id' : user.role_id,
+        'email' : user.email,
     })
 
-@users.route('/api/users/search', methods=['GET'])
-@login_required
-@adm_required
-def search_users():
-    query = request.args.get('query')
-
-    users = User.query.join(UserRole).filter(
-        ((User.id == query) |
-         (User.name == str(query).lower()) |
-         (User.username == query) | 
-         (UserRole.desc == str(query).lower()) |
-         (User.email == query))
-    ).all()
-    
-    users_list = [
-        {
-            'id' : user.id,
-            'name' : str(user.name).title(),
-            'username' : user.username,
-            'role' : str(user.roles.desc).title(),
-            'email' : user.email,
-            'date_created' : user.date_created
-        }
-        for user in users
-    ]
-
-    return jsonify({'users' : users_list})
 
 @users.route('/api/users/new', methods=['POST'])
 @login_required
@@ -113,14 +83,85 @@ def new_user():
     return redirect(url_for('users.render_page'))
         
 
-@users.route('/api/users/edit', methods=['POST'])
+@users.route('/api/users/mudar-senha', methods=['POST'])
+@login_required
+@adm_required
+def change_password():
+    form = ChangePasswdForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+        new_passwd = str(form.new_password.data).strip()
+        confirm = str(form.confirm.data).strip()
+
+        if new_passwd != confirm:
+            flash('Os campos de senha devem ser idênticos.')
+        elif len(new_passwd) < 10:
+            flash('A senha deve possuir pelo menos 10 caracteres.')
+        else:
+            try:
+                user = User.query.filter_by(id=id).first()
+                if not user:
+                    flash(f'Usuário com o id {user.username} não encontrado no banco de dados.')
+                else:
+                    user.password = bcrypt.generate_password_hash(new_passwd).decode('utf-8')
+                    db.session.commit()
+                    flash('Senha alterada com sucesso!')
+            except Exception as e:
+                flash(f'Erro ao realizar mudança de senha - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('users.render_page'))
+
+@users.route('/api/users/editar', methods=['POST'])
 @login_required
 @adm_required
 def edit_user():
-    pass
+    form = EditUserForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+        name = str(form.name.data).strip()
+        username = str(form.name.data).strip()
+        role_id = form.role_id.data
+        email = str(form.email.data).strip()
+
+        try:
+            user = User.query.filter_by(id=id).first()
+            user.name = name
+            user.username = username
+            user.role_id = role_id
+            user.email = email
+            db.session.commit()
+            flash(f'Usuário {username} alterado com sucesso!')
+        except Exception as e:
+            flash(f'Erro ao editar usuário - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('users.render_page'))
 
 @users.route('/api/users/delete', methods=['POST'])
 @login_required
 @adm_required
 def delete_user():
-    pass 
+    form = DeleteUserForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+
+        try:
+            user = User.query.filter_by(id=id).first()
+            username = user.username
+
+            if not user:
+                flash('Usuário ainda não cadastrado.')
+            else:
+                db.session.query(User).filter_by(id=id).delete()
+                db.session.commit()
+                flash(f'Usuário "{username}" removido com sucesso.')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao deletar usuário - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('users.render_page'))

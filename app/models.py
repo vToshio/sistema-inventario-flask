@@ -18,7 +18,7 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     role_id = db.Column('role', db.Integer(), db.ForeignKey('roles.id'), nullable=False)
-    name = db.Column('name', db.String(30), nullable=False)
+    name = db.Column('name', db.String(50), nullable=False)
     username = db.Column('username', db.String(20), nullable=False, unique=True)
     password = db.Column('password', db.String(100), nullable=False)
     email = db.Column('email', db.String(50), nullable=False, unique=True)
