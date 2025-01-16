@@ -2,16 +2,18 @@ from flask import Flask
 from datetime import datetime
 
 from app.models import db, User, UserRole
-from app.views import views
+from app.src.login.routes import login
 from app.helpers import csrf, bcrypt
-from app.inventory.routes import inventory
-from app.clients.routes import customers
-from app.users.routes import users
-from app.sales.routes import sales
+from app.src.home.routes import home
+from app.src.inventory.routes import inventory
+from app.src.clients.routes import customers
+from app.src.users.routes import users
+from app.src.sales.routes import sales
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    app.register_blueprint(views)
+    app.register_blueprint(login)
+    app.register_blueprint(home)
     app.register_blueprint(inventory)
     app.register_blueprint(customers)
     app.register_blueprint(sales)

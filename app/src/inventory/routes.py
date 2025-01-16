@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, jsonify, url_for, flash, get_flashed_messages, request, session
 from app.models import db, Product, ProductCategory
 from app.helpers import login_required
-from app.inventory.forms import *
+from app.src.inventory.forms import *
 
 inventory = Blueprint('inventory', __name__)
 

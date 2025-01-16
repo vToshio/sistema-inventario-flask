@@ -18,7 +18,7 @@
         
             <ul>
                 <!-- Divisoria 1 -->
-                <li><a href="{{ url_for('views.home') }}">Home</a></li>
+                <li><a href="{{ url_for('home.render_page') }}">Home</a></li>
                 <li><a href="{{ url_for('inventory.render_page') }}">Estoque</a></li>
                 <li><a href="{{ url_for('customers.render_page') }}">Clientes</a></li>
                 <li><a href="{{ url_for('sales.render_page') }}">Vendas</a></li>
@@ -31,7 +31,7 @@
                 {% if session['user_role'] in ['master', 'admin'] %}
                 <li><a href="{{ url_for('users.render_page') }}">Usuários</a></li>
                 {% endif %}
-                <a href="{{ url_for('views.logout') }}">Logout</a>
+                <a href="{{ url_for('login.logout') }}">Logout</a>
             </ul>
 
         </section>

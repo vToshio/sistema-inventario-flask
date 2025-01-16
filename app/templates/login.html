@@ -24,7 +24,7 @@
 
         <section>
             <h1>Login</h1>
-            <form method="POST" action="{{ next or url_for('views.login') }}">
+            <form method="POST" action="{{ next or url_for('login.render_page') }}">
                 {{ form.csrf_token }}
                 {{ form.nextpage(value=next) }}
                 <div>

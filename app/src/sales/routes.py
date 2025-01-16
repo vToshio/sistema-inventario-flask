@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app, render_template, jsonify, flash, get_flashed_messages, redirect, url_for, session, request
 from app.helpers import login_required, flash_messages
 from app.models import db, User, Customer, Sale, Product, SaleProducts
-from app.sales.forms import *
+from app.src.sales.forms import *
 
 sales = Blueprint('sales', __name__)
 

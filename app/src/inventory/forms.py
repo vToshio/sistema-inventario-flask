@@ -5,11 +5,6 @@ from app.models import db, ProductCategory
 
 DATA_REQUIRED_MESSAGE = 'O preenchimento deste campo é obrigatório.'
 
-class LoginForm(FlaskForm):
-    username = StringField('Usuário', id='username-login', name='username-login', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
-    password = PasswordField('Senha', id='senha-login', name='senha-login', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
-    submit = SubmitField('Entrar')
-    nextpage = HiddenField()
 
 class NewProductForm(FlaskForm):
     desc = StringField('Descrição', id='desc-cadastrar', name='desc-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=100)])

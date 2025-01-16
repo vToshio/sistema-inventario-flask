@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, get_flashed_messages, flash, redirect, url_for, request, session
 from app.models import db, User, UserRole
-from app.users.forms import * 
+from app.src.users.forms import * 
 from app.helpers import login_required, adm_required, flash_messages, bcrypt
 
 users = Blueprint('users', __name__)
