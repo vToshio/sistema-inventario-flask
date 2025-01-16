@@ -7,12 +7,14 @@ from app.helpers import csrf, bcrypt
 from app.inventory.routes import inventory
 from app.clients.routes import customers
 from app.users.routes import users
+from app.sales.routes import sales
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.register_blueprint(views)
     app.register_blueprint(inventory)
     app.register_blueprint(customers)
+    app.register_blueprint(sales)
     app.register_blueprint(users)
     app.config.from_pyfile('config.py')
     
