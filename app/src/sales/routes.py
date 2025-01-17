@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, jsonify, flash, get_flashed_messages, redirect, url_for, session, request
+from flask import Blueprint, render_template,make_response, jsonify, flash, get_flashed_messages, redirect, url_for, session, request
 from app.helpers import login_required
 from app.models import db, User, Customer, Sale, Product, SaleProducts
 from app.src.sales.forms import *
-from datetime import datetime
+import pdfkit
 
 sales = Blueprint('sales', __name__)
 
@@ -19,6 +19,51 @@ def render_page():
         session = session,
         messages = messages
     )
+
+
+@sales.route('/sistema/home/vendas/<int:sale_id>', methods=['GET'])
+@login_required
+def download_pdf(sale_id: int):
+    try:
+        sale = Sale.query.filter_by(id=sale_id).first()
+        salesman = User.query.join(Sale).filter(Sale.id==sale_id).first()
+        customer = Customer.query.join(Sale).filter(Sale.id==sale_id).first()
+
+        products = []
+        subtotal = 0
+        total = 0
+        for sale_product in SaleProducts.query.filter_by(sale_id=sale_id).all():
+            prod = {
+                'product_data' : Product.query.filter_by(id=sale_product.product_id).first(),
+                'sale_quantity' : sale_product.quantity
+            }
+            subtotal += prod['product_data'].price * prod['sale_quantity']
+            products.append(prod)
+        
+        total = subtotal - (subtotal * sale.discount/100)
+        discount = subtotal - total
+        rendered = render_template(
+            'nota_fiscal.html',
+            pagetitle = 'Nota Fiscal',
+            sale = sale,
+            products = products,
+            customer = customer,
+            salesman = salesman,
+            subtotal = round(subtotal, 2),
+            total = round(total, 2),
+            discount = round(discount, 2)
+        )
+
+        pdf = pdfkit.from_string(rendered, False)
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pd'
+        response.headers['Content-Disposition'] = f'inline;filename="nf-{sale_id}-{sale.sell_date}.pdf"'
+
+        return response
+    except Exception as e:
+        flash(f'Erro ao baixar pdf - {e}')
+        return redirect(url_for('sales.render_page'))
+
 
 @sales.route('/api/sales', methods=['GET'])
 @login_required

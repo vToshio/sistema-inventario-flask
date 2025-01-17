@@ -1,6 +1,7 @@
 const productsContainer = document.getElementById('container-produtos');
 const addProductButton = document.getElementById('add-product');
 const table = document.getElementById('body-tabela-vendas');
+const download_url = '/sistema/home/vendas/';
 let index = 0;
 let total;
 let current_page = 1;
@@ -67,7 +68,7 @@ const load_sales = async (page) => {
                 <td scope="col">${sale.sell_date}</td>
                 <td scope="col">${sale.total}</td>
                 <td scope="col">
-                    <button class="botao-download btn btn-success" type="button">Download</button>
+                    <a class="botao-download btn btn-success" href="${url_for_nf + sale.id}">Download</a>
                 </td>
             `;
             table.appendChild(row);
@@ -101,7 +102,7 @@ const search_sales = async () => {
             <td scope="col">${sale.sell_date}</td>
             <td scope="col">${sale.total}</td>
             <td scope="col">
-                <button class="botao-download btn btn-success" data-id=${sale.id} type="button">Download</button>
+                <a class="botao-download btn btn-success" href="${download_url + sale.id}">Download</a>
             </td>
         `;
         table.appendChild(row);
