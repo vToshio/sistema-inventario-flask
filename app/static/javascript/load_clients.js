@@ -3,12 +3,8 @@ let current_page = 1;
 const per_page = 10;
 const table = document.getElementById('body-tabela-clientes');
 
-const handleClickDelete = (event, {title_id, input_id, prefix}) => {
-    const id = event.target.dataset.id;
-    const name = event.target.dataset.name;
-
-    document.getElementById(title_id).textContent = `${prefix} ${name}`
-    document.getElementById(input_id).value = id;
+const handleClickDelete = (event, {title_id, title}) => {
+    document.getElementById(title_id).textContent = `${title}`
 };
 
 const handleClickEdit = async (event, {title_id, title_msg}) => {
@@ -51,10 +47,9 @@ const load_clients = async () => {
                 <td scope="col">${client.id}</td>
                 <td scope="col">${client.name}</td>
                 <td scope="col">${client.email}</td>
-                <td scope="col">${client.address}</td>
+                <td scope="col">${client.address}</td> 
                 <td scope="col">
                     <button class="botao-editar-cliente btn btn-secondary" data-id="${client.id}" data-bs-toggle="modal" data-bs-target="#modal-editar-cliente">E</button>
-                    <button class="botao-deletar-cliente btn btn-danger" data-id="${client.id}" data-name="${client.name}" data-bs-toggle="modal" data-bs-target="#modal-deletar-cliente">D</button>
                 </td>
             `;
             table.appendChild(row);
@@ -66,8 +61,7 @@ const load_clients = async () => {
         });
         attach_event_listeners('botao-deletar-cliente', handleClickDelete, {
             'title_id' : 'titulo-modal-deletar-cliente',
-            'input_id' : 'id-deletar-cliente',
-            'prefix' : 'Deletar'
+            'title' : 'Deletar Cliente'
         });
     } catch (e) {
         console.error(`Erro no carregamento de clientes - ${e}`);
@@ -96,8 +90,7 @@ const search_clients = async () => {
                 <td scope="col">${client.email}</td>
                 <td scope="col">${client.address}</td>
                 <td scope="col">
-                    <button class="botao-editar-cliente btn btn-secondary" data-id="${client.id}">E</button>
-                    <button class="botao-deletar-cliente btn btn-danger" data-id="${client.id}">D</button>
+                    <button class="botao-editar-cliente btn btn-secondary" data-id="${client.id}" data-bs-toggle="modal" data-bs-target="#modal-editar-cliente">E</button>
                 </td>
             `;
             table.appendChild(row);
@@ -107,10 +100,9 @@ const search_clients = async () => {
             'title_id' : 'titulo-modal-editar-cliente',
             'title_msg' : 'Editar Cliente'
         });
-        attach_event_listeners('botao-deletar-cliente', handleClick, {
+        attach_event_listeners('botao-deletar-cliente', handleClickDelete, {
             'title_id' : 'titulo-modal-deletar-cliente',
-            'input_id' : 'id-deletar-cliente',
-            'prefix' : 'Deletar'
+            'title' : 'Deletar Cliente'
         });
     } catch (e) {
         console.error(`Erro na pesquisa - ${e}`);

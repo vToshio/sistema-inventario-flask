@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, EmailField, StringField, SubmitField
+from wtforms import HiddenField, EmailField, StringField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length
 from app.models import db
 
@@ -10,7 +10,7 @@ class NewCustomerForm(FlaskForm):
     submit = SubmitField('Cadastrar Cliente')
 
 class DeleteCustomerForm(FlaskForm):
-    id = HiddenField(id='id-deletar-cliente', name='id-deletar-cliente')
+    id = IntegerField('ID do cliente', id='id-deletar-cliente', name='id-deletar-cliente', validators=[DataRequired()])
     submit = SubmitField('Deletar Cliente')
 
 class EditCustomerForm(FlaskForm):
