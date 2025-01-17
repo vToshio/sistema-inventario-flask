@@ -1,15 +1,17 @@
 from flask import flash, redirect, flash, url_for, session
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import model
-from typing import List, Type
+from typing import List, Dict
 from functools import wraps
 
 bcrypt = Bcrypt()
 csrf = CSRFProtect()
 
-def flash_messages(form_errors: List[Type[tuple]]):
-    for field, errors in form_errors.items:
+def flash_messages(form_errors: Dict[str, List[str]]):
+    '''
+    Função auxiliar e exibe notificações de erro de preenchimento em um campo
+    '''
+    for field, errors in form_errors.items():
         for e in errors:
             flash(f'Erro no campo {field} - {e}')
 

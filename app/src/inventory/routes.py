@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, jsonify, url_for, flash, get_flashed_messages, request, session
 from app.models import db, Product, ProductCategory
-from app.helpers import login_required
+from app.helpers import login_required, flash_messages
 from app.src.inventory.forms import *
 
 inventory = Blueprint('inventory', __name__)
@@ -9,40 +9,44 @@ inventory = Blueprint('inventory', __name__)
 @login_required
 def render_page():
     '''
-    Métodos:
-    - GET: Renderiza a página de gerenciamento do estoque.
+    Renderiza a página de gerenciamento de estoque.
     '''
-   
     products = Product.query.first()
-    categories = ProductCategory.query.all()
-        
-    new_product = NewProductForm()
-    add_units = AddUnitsForm()
-    edit_product = EditProductForm()
-    delete_product = DeleteProductForm()
-    new_category = NewCategoryForm()
-    delete_category = DeleteCategoryForm()
-        
-    messages = get_flashed_messages()
+    categories = ProductCategory.query.all()        
 
     return render_template(
         'estoque.html',
         pagetitle='Estoque',
-        new_product=new_product,
-        add_units=add_units,
-        edit_product=edit_product,
-        delete_product=delete_product,
-        new_category=new_category,
-        delete_category=delete_category, 
-        messages=messages, 
-        categories=categories, 
-        products=products, 
-        session=session
+        new_product = NewProductForm(),
+        add_units = AddUnitsForm(),
+        edit_product = EditProductForm(),
+        delete_product = DeleteProductForm(),
+        new_category = NewCategoryForm(),
+        delete_category = DeleteCategoryForm(), 
+        messages = get_flashed_messages(), 
+        categories = categories, 
+        products = products, 
+        session = session
     )
 
 @inventory.route('/api/products', methods=['GET'])
 @login_required
 def get_products():
+    '''
+    Rota da API que retorna uma lista de produtos paginados através de um request por método GET.
+
+    Query args:
+    - page (int): Define a página de produtos em que a tabela se localiza
+    - per_page (int): define quantos produtos serão renderizados por página
+
+    Retorno:
+    - JSON contendo:
+        - 'products' (list): lista de produtos
+        - 'page' (int): página atual
+        - 'per_page' (int): quantidade de produtos por página
+        - 'total' (int): quantidade total de produtos
+        - 'pages' (int): quantidade total de páginas
+    '''
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=10, type=int)
 
@@ -72,6 +76,13 @@ def get_products():
 @inventory.route('/api/categories', methods=['GET'])
 @login_required
 def get_categories():
+    '''
+    Rota da API que retorna uma lista de categorias ao receber uma request por método GET.
+
+    Retorno:
+    - JSON contendo:
+        - 'categories' (list): lista de categorias de produtos
+    '''
     categories = ProductCategory.query.all()
 
     cat_list = [
@@ -88,6 +99,16 @@ def get_categories():
 @inventory.route('/api/products/search', methods=['GET'])
 @login_required
 def search_products():
+    '''
+    Rota da API que retorna uma lista com todos os produtos identificados por uma query string.
+
+    Query Args:
+    - query (str): string que identifica um produto por id, descrição, preço ou quantidade
+
+    Retorno:
+    - JSON contendo:
+        - 'products' (list): lista de produtos identificados pela query string
+    '''
     query = request.args.get('query', default='')
 
     products = Product.query.join(ProductCategory).filter(
@@ -116,6 +137,15 @@ def search_products():
 @inventory.route('/api/products/new', methods=['POST'])
 @login_required
 def new_product():
+    '''
+    Rota da API que registra no banco de dados um novo produto, através do método POST.
+    
+    Dados Coletados NewProductForm:
+    - desc (str): descrição do produto
+    - category (int): id de identicação de categoria de um produto
+    - price (float): valor do produto
+    '''
+
     form = NewProductForm()
     
     if form.validate_on_submit():
@@ -123,21 +153,22 @@ def new_product():
         category = form.category_id.data
         price = form.price.data
 
-        if Product.query.filter_by(desc=desc).first():
-            flash(f'Produto com o nome "{desc}" já cadastrado.')
-        else:
-            try:
-                db.session.add(Product(
-                    desc = str(desc).strip().lower(), 
-                    category_id = int(category), 
-                    price = float(price), 
-                    quantity = 0)
-                )
-                db.session.commit()
-                flash(f'Produto "{desc}" cadastrado com sucesso!')
-            except Exception as e:
-                db.session.rollback()
-                flash(f'Erro no cadastro do produto - {e}')
+        try:
+            if Product.query.filter_by(desc=desc).first():
+                raise Exception(f'Produto com o nome "{desc.title()}" já cadastrado.')
+        
+            db.session.add(Product(
+                desc = str(desc).strip().lower(), 
+                category_id = int(category), 
+                price = float(price), 
+                quantity = 0)
+            )
+
+            db.session.commit()
+            flash(f'Produto "{desc}" cadastrado com sucesso!')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro no cadastro do produto - {e}')
     else:
         flash('Todos os campos devem estar preenchidos.')
     return redirect(url_for('inventory.render_page'))
@@ -146,33 +177,47 @@ def new_product():
 @inventory.route('/api/products/add-units', methods=['POST'])
 @login_required
 def add_units():
+    '''
+    Rota da API que adiciona unidades à um produto já cadastrado, por meio do método POST.
+
+    Dados AddUnitsForm:
+    - id (int): id de identificação do produto
+    - units (int): quantidade de unidades adicionadas ao estoque
+    '''
     form = AddUnitsForm()
     
     if form.validate_on_submit():
         id = form.id.data
         units = form.units.data
     
-        product = Product.query.filter_by(id=id).first()
+        try:
+            product = Product.query.filter_by(id=id).first()
         
-        if not product:
-            flash('Produto não encontrado na base de dados.')
-        else:
-            try:
-                product = db.session.query(Product).filter_by(id=id).first()
-                product.quantity += units
-                db.session.commit()
-                flash(f'{units} adicionadas ao produto "{product.desc}".')
-            except Exception as e:
-                flash(f'Erro ao adicionar unidades - {e}')
+            if not product:
+                raise Exception('Produto não encontrado na base de dados.')
+       
+            product = db.session.query(Product).filter_by(id=id).first()
+            product.quantity += units
+            db.session.commit()
+            flash(f'{units} adicionadas ao produto "{product.desc.title()}".')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao adicionar unidades - {e}')
     else:
-        for field, errors in form.errors.items():
-            for e in errors:
-                flash(f'Erro no campo {field}: {e}')
+        flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
 
 @inventory.route('/api/products/edit', methods=['POST'])
 @login_required
 def edit_product():
+    '''
+    Rota da API que redefine os dados de um produto (já cadastrado), por meio do método POST.
+
+    Dados alterados:
+    - desc (str): descrição do produto
+    - price (float): preço do produto
+    - category_id (int): id da categoria do produto
+    '''
     form = EditProductForm()
 
     if form.validate_on_submit():
@@ -181,57 +226,63 @@ def edit_product():
         price = form.price.data
         category_id = form.category.data
 
-        product = Product.query.filter_by(id=id).first()
-
         try:
+            product = Product.query.filter_by(id=id).first()
+
             if not product:
-                flash(f'Produto "{desc}" não encontrado na base de dados')
-            else:
-                product.desc = desc
-                product.price = price
-                product.category_id = category_id
-                db.session.commit()
-                flash(f'Alterações no produto de ID {id} realizadas com sucesso!')
+                raise Exception(f'Produto "{desc}" não encontrado na base de dados')
+            
+            product.desc = desc
+            product.price = price
+            product.category_id = category_id
+            db.session.commit()
+            flash(f'Alterações no produto de ID {id} realizadas com sucesso!')
         except Exception as e:
             flash(f'Erro na alteração de dados do produto - {e}')
     else:
-        for field, errors in form.errors.items():
-            for e in errors:
-                flash(f'Erro no campo {field}: {e}')
+        flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/products/delete', methods=['POST'])
 @login_required
 def delete_product():
+    '''
+    Rota da API que deleta um produto do banco de dados, por método POST.
+    '''
     form = DeleteProductForm()
     
     if form.validate_on_submit():
         id = form.id.data
+        try:
+            product = Product.query.filter_by(id=id).first()
 
-        product = Product.query.filter_by(id=id).first()
-        desc = product.desc
-
-        if not product:
-            flash('Produto não encontrado no banco de dados.')
-        else:
-            try:
-                db.session.query(Product).filter_by(id=id).delete()
-                db.session.commit()
-                flash(f'Produto "{desc}" deletado com sucesso!')
-            except Exception as e:
-                db.session.rollback()
-                flash(f'Erro ao deletar produto - {e}')
+            if not product:
+                raise Exception('Produto não cadastrado no banco de dados.')
+            elif product.quantity > 0:
+                raise Exception('Ainda há unidades deste produto em estoque.')
+            
+            desc = product.desc
+            db.session.query(Product).filter_by(id=id).delete()
+            db.session.commit()
+            flash(f'Produto "{desc}" deletado com sucesso!')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao deletar produto - {e}')
     else:
-        for field, errors in form.errors.items():
-            for e in errors:
-                flash(f'Erro no campo {field}: {e}')
+        flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/categories/new', methods=['POST'])
 @login_required
 def new_category():
+    '''
+    Rota da API que registra uma nova categoria, através do método POST.
+
+    Dados cadastrado por categoria:
+    - desc (str): descrição da categoria
+    '''
     form = NewCategoryForm()
 
     if form.validate_on_submit():
@@ -239,26 +290,25 @@ def new_category():
         
         try:
             if ProductCategory.query.filter_by(desc=desc).first():
-                flash(f'Categoria com a descrição "{desc}" já foi cadastrada.')
-            else:
-                db.session.add(ProductCategory(desc=desc))
-                db.session.commit()
-                flash(f'Categoria "{desc}" cadastrada com sucesso!')
-        except ValueError:
-            flash('Campos com valores inválidos.')
+                raise Exception(f'Categoria com a descrição "{desc}" já foi cadastrada.')
+            
+            db.session.add(ProductCategory(desc=desc))
+            db.session.commit()
+            flash(f'Categoria "{desc}" cadastrada com sucesso!')
         except Exception as e:
             db.session.rollback()
             flash(f'Erro no cadastro de categoria - {e}')
     else:
-        for field, errors in form.errors.items():
-            for e in errors:
-                flash(f'Erro no campo {field}: {e}')
+        flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
 
 
 @inventory.route('/api/categories/delete', methods=['POST'])
 @login_required
 def delete_category():
+    '''
+    Rota da API que deleta uma categoria do banco de dados, por método POST.
+    '''
     form = DeleteCategoryForm()
 
     if form.validate_on_submit():
@@ -267,19 +317,18 @@ def delete_category():
         try:    
             category = ProductCategory.query.filter_by(id=id).first()
             desc = category.desc
+            
             if not category:
-                flash('Categoria não existente no banco de dados.')
+                raise Exception('Categoria não existente no banco de dados.')
             elif Product.query.filter_by(category_id=id).first():
-                flash('Não é possível deletar essa categoria pois ela ainda possuí produtos associados à ela.')
-            else: 
-                db.session.query(ProductCategory).filter_by(id=id).delete()
-                db.session.commit()
-                flash(f'Categoria "{desc}" deletada com sucesso!')
+                raise Exception('Não é possível deletar essa categoria pois ela ainda possuí produtos associados à ela.')
+            
+            db.session.query(ProductCategory).filter_by(id=id).delete()
+            db.session.commit()
+            flash(f'Categoria "{desc}" deletada com sucesso!')
         except Exception as e:
             db.session.rollback()
             flash(f'Erro na deleção de categoria - {e}')
     else:
-        for field, errors in form.errors.items():
-            for e in errors:
-                flash(f'Erro no campo {field}: {e}')
+        flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
