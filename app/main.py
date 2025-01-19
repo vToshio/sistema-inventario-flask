@@ -1,12 +1,12 @@
 from flask import Flask
 from datetime import datetime
 
-from app.models import db, User, UserRole
+from app.models import db, User, UserRole, ProductCategory
 from app.src.login.routes import login
 from app.helpers import csrf, bcrypt
 from app.src.home.routes import home
 from app.src.inventory.routes import inventory
-from app.src.clients.routes import customers
+from app.src.customers.routes import customers
 from app.src.users.routes import users
 from app.src.sales.routes import sales
 
@@ -39,6 +39,7 @@ def create_app() -> Flask:
                 email='administrador_empresa@email.com', 
                 date_created=datetime.now())
             )
+            db.session.add(ProductCategory(id=0, desc='Não Registrada'))
             db.session.commit()
 
     return app

@@ -7,7 +7,7 @@ users = Blueprint('users', __name__)
 
 @users.route('/sistema/home/usuarios', methods=['GET'])
 @login_required
-@adm_required
+@adm_required()
 def render_page():
     new_users = NewUserForm()
     change_passwd = ChangePasswdForm()
@@ -31,7 +31,7 @@ def render_page():
 
 @users.route('/api/users/<int:id>', methods=['GET'])
 @login_required
-@adm_required
+@adm_required()
 def get_user(id: int):
     user = User.query.filter_by(id=id).first()
 
@@ -46,7 +46,7 @@ def get_user(id: int):
 
 @users.route('/api/users/new', methods=['POST'])
 @login_required
-@adm_required
+@adm_required()
 def new_user():
     form = NewUserForm()
 
@@ -85,7 +85,7 @@ def new_user():
 
 @users.route('/api/users/mudar-senha', methods=['POST'])
 @login_required
-@adm_required
+@adm_required()
 def change_password():
     form = ChangePasswdForm()
 
@@ -115,7 +115,7 @@ def change_password():
 
 @users.route('/api/users/editar', methods=['POST'])
 @login_required
-@adm_required
+@adm_required()
 def edit_user():
     form = EditUserForm()
 
@@ -142,7 +142,7 @@ def edit_user():
 
 @users.route('/api/users/delete', methods=['POST'])
 @login_required
-@adm_required
+@adm_required()
 def delete_user():
     form = DeleteUserForm()
 

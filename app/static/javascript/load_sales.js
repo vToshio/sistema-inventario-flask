@@ -1,5 +1,5 @@
-const productsContainer = document.getElementById('container-produtos');
-const addProductButton = document.getElementById('add-product');
+const products_container = document.getElementById('container-produtos');
+const add_product_button = document.getElementById('botao-adicionar-produto');
 const table = document.getElementById('body-tabela-vendas');
 const download_url = '/sistema/home/vendas/';
 let index = 0;
@@ -7,10 +7,11 @@ let total;
 let current_page = 1;
 const per_page = 10;
  
-const addProductField = () => {
-    const productField = document.createElement('div');
-    productField.classList.add('product-field', 'mb-3');
-    productField.innerHTML = `
+const add_product_field = () => {
+    const product_field = document.createElement('div');
+
+    product_field.classList.add('product-field', 'mb-3');
+    product_field.innerHTML = `
         <div class="row">
             <div class="col">
                 <input type="number" name="products-${index}-id" id="products-${index}-id" class="form-control" placeholder="ID do Produto" required>
@@ -23,17 +24,13 @@ const addProductField = () => {
             </div>
         </div>
     `;
-    productsContainer.appendChild(productField);
+    products_container.appendChild(product_field);
 
-    productField.querySelector('.botao-remover-produto').addEventListener('click', () => {
-        productField.remove();
+    product_field.querySelector('.botao-remover-produto').addEventListener('click', () => {
+        product_field.remove();
     });
 
     index++;
-};
-
-const handleDownload = async () => {
-    console.log('teste');
 };
 
 const attach_event_listeners = (class_name, handler, handler_args) => {
@@ -68,7 +65,7 @@ const load_sales = async (page) => {
                 <td scope="col">${sale.sell_date}</td>
                 <td scope="col">${sale.total}</td>
                 <td scope="col">
-                    <a class="botao-download btn btn-success" href="${url_for_nf + sale.id}">Download</a>
+                    <a class="botao-download btn btn-success" href="${download_url + sale.id}">Download</a>
                 </td>
             `;
             table.appendChild(row);
@@ -126,9 +123,8 @@ document.getElementById('botao-proxima').addEventListener('click', () => {
 document.getElementById('botao-pesquisa').addEventListener('click', () => search_sales());
 
 document.addEventListener('DOMContentLoaded', () => {
-    addProductField();
-    addProductButton.addEventListener('click', addProductField);
+    add_product_field();
+    add_product_button.addEventListener('click', add_product_field);
     
     load_sales(current_page);    
-    
 });

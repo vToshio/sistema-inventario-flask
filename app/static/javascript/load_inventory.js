@@ -1,7 +1,29 @@
-let total;
+const table = document.getElementById('body-tabela-estoque');
+const user_role = document.getElementById('user_role').value; 
 let current_page = 1;
 const per_page = 10;
-const table = document.getElementById('body-tabela-estoque')
+let total;
+
+const enable_buttons = async (class_name) => {
+    await Array.from(document.getElementsByClassName(class_name)).forEach(btn => {
+        btn.classList.remove('disabled');
+    });
+};
+
+const disable_buttons = async (class_name) => {
+    await Array.from(document.getElementsByClassName(class_name)).forEach(btn => {
+        btn.classList.add('disabled');
+    });
+};
+
+const disable_button = async (button_id) => {
+    document.getElementById(button_id).classList.add('disabled');
+}
+
+const enable_button = async (button_id) => {
+    document.getElementById(button_id).classList.remove('disabled');
+}
+
 
 const populate_select = async () => {
     try {
@@ -59,15 +81,16 @@ const load_products = async (page) => {
     try {
         const response = await fetch(`/api/products?page=${current_page}&per_page=${per_page}`);
         const data = await response.json();
-        
+        const products = Array.from(data.products);
+
         table.innerHTML = '';
 
-        if (data.total === 0) {
-            table.innerHTML = '<tr><td colspan="6">Nenhum produto cadastrado no sistema.</td></tr>';
+        if (products.length === 0) {
+            table.innerHTML = '<tr><td colspan="6">Nenhum produto cadastrado ou ativo no sistema.</td></tr>';
             return;
         }
 
-        data.products.forEach(product => {
+        products.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td scope="col">${product.id}</td>
@@ -78,7 +101,7 @@ const load_products = async (page) => {
                 <td scope="col">
                     <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
                     <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
-                    <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deletar-produto" type="button">R</button>
+                    <button class="botao-desativar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-desativar-produto" type="button">R</button>
                 </td>
             `;
 
@@ -93,10 +116,10 @@ const load_products = async (page) => {
         attach_event_listeners('botao-editar-produto', handleClickEdit, { 
             prefix : 'Editar Produto'
         });
-        attach_event_listeners('botao-deletar-produto', handleClick, {
-            title_id : 'titulo-modal-deletar-produto',
-            input_id : 'id-produto-deletar',
-            prefix : 'Deletar'
+        attach_event_listeners('botao-desativar-produto', handleClick, {
+            title_id : 'titulo-modal-desativar-produto',
+            input_id : 'id-desativar-produto',
+            prefix : 'Desativar'
         });
         current_page = data.page;
     } 
@@ -112,14 +135,14 @@ const search_products = async () => {
         const data = await response.json();
         const products = Array.from(data.products);
 
-        table.innerHTML = ''; // Limpar a tabela antes de cada pesquisa
-        
+        table.innerHTML = ''; 
+
         if (products.length === 0) {
             table.innerHTML = '<tr><td colspan="6">Nenhum produto encontrado.</td></tr>';
             return;
         }
 
-        products.forEach(product => {
+        await products.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td scope="col">${product.id}</td>
@@ -128,29 +151,40 @@ const search_products = async () => {
                 <td scope="col">${product.quantity}</td>
                 <td scope="col">${product.price}</td> 
                 <td scope="col">
-                <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
-                <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
-                <button class="botao-deletar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-deletar-produto" type="button">R</button>
+                    <button id="botao-adicionar-unidades-${product.id}" class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
+                    <button id="botao-editar-produto-${product.id}" class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
+                    <button id="botao-desativar-produto-${product.id}"  class="botao-desativar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-desativar-produto" type="button">R</button>
                 </td>
             `;
             table.appendChild(row);
+
+            if (!product.status) {
+                disable_button(`botao-adicionar-unidades-${product.id}`);
+                disable_button(`botao-editar-produto-${product.id}`);
+                disable_button(`botao-desativar-produto-${product.id}`);
+            }
         });
         
         attach_event_listeners('botao-adicionar-unidades', handleClick, {
             title_id : 'titulo-modal-adicionar-unidades',
-            input_id : 'id-produto-adicionar-unidades',
+            input_id : 'id-produto-adicionar',
             prefix : 'Adicionar'
         });
-        attach_event_listeners('botao-editar-produto', handleClick, {
+        attach_event_listeners('botao-editar-produto', handleClickEdit, {
             title_id : 'titulo-modal-editar-produto',
             input_id : 'id-produto-editar-produto',
             prefix : 'Editar'
         });
-        attach_event_listeners('botao-deletar-produto', handleClick, {
-            title_id : 'titulo-modal-deletar-produto',
-            input_id : 'id-produto-deletar',
-            prefix : 'Deletar'
+        attach_event_listeners('botao-desativar-produto', handleClick, {
+            title_id : 'titulo-modal-desativar-produto',
+            input_id : 'id-desativar-produto',
+            prefix : 'Desativar'
         });
+
+        if (user_role === 'user') {
+            disable_buttons('botao-editar-produto');
+            disable_buttons('botao-desativar-produto');
+        }
     }
     catch (error) {
         console.error('Erro na pesquisa de produtos: ', error)
@@ -170,18 +204,28 @@ try {
     console.error('Botão de deletar categoria não encontrado');
 }
 
-/* Barra de Pesquisa */
-document.getElementById('botao-pesquisa').addEventListener('click', () => search_products())
-
-/* Botões de Paginação*/
-document.getElementById('anterior').addEventListener('click', () => {
-    if (current_page>1) 
-        load_products(current_page-1);
-})
-document.getElementById('proxima').addEventListener('click', () => {
-    if (current_page<total)
-        load_products(current_page+1);
-})
-
 /* Carregamento dos Produtos na Tabela*/ 
-document.addEventListener('DOMContentLoaded', () => load_products(current_page))
+document.addEventListener('DOMContentLoaded', async () => {
+    await load_products(current_page);
+
+    if (user_role === 'user') {
+        disable_buttons('botao-editar-produto');
+        disable_buttons('botao-desativar-produto');
+    } else {
+        enable_buttons('botao-editar-produto');
+        enable_buttons('botao-desativar-produto');
+    }
+   
+    /* Barra de Pesquisa */
+    document.getElementById('botao-pesquisa').addEventListener('click', () => search_products())
+    
+    /* Botões de Paginação*/
+    document.getElementById('anterior').addEventListener('click', () => {
+        if (current_page>1) 
+            load_products(current_page-1);
+    })
+    document.getElementById('proxima').addEventListener('click', () => {
+        if (current_page<total)
+            load_products(current_page+1);
+    })
+});

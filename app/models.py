@@ -19,7 +19,7 @@ class User(db.Model):
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     role_id = db.Column('role', db.Integer(), db.ForeignKey('roles.id'), nullable=False)
     name = db.Column('name', db.String(50), nullable=False)
-    username = db.Column('username', db.String(20), nullable=False, unique=True)
+    username = db.Column('username', db.String(20), nullable=False)
     password = db.Column('password', db.String(100), nullable=False)
     email = db.Column('email', db.String(50), nullable=False, unique=True)
     date_created = db.Column('date_created', db.Date, default=datetime.now, nullable=False)
@@ -54,9 +54,10 @@ class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
     desc = db.Column('desc', db.String(100), nullable=False, unique=True)
+    status = db.Column('status', db.Integer(), default=1, nullable=False)
     quantity = db.Column('quantity', db.Integer(), nullable=False)
     price = db.Column('price', db.Numeric(precision=10, scale=2), nullable=False)
-    category_id = db.Column('category_id', db.Integer(), db.ForeignKey('product_categories.id'), nullable=False)
+    category_id = db.Column('category_id', db.Integer(), db.ForeignKey('product_categories.id'), nullable=True)
 
     category = db.relationship('ProductCategory', back_populates='product', foreign_keys=[category_id])
     sale_products = db.relationship('SaleProducts', back_populates='product', foreign_keys='SaleProducts.product_id')
@@ -96,6 +97,8 @@ class Customer(db.Model):
     __tablename__ = 'customers'   
     id = db.Column('id', db.Integer(), primary_key=True, nullable=False)
     name = db.Column('name', db.String(50), nullable=False) 
+    status = db.Column('status', db.Integer(), default=1, nullable=False)
+    cpf = db.Column('cpf', db.String(11), unique=True, nullable=False)
     email = db.Column('email', db.String(50), unique=True, nullable=False)
     address = db.Column('address', db.String(100), nullable=False)
     

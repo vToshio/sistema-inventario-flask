@@ -8,9 +8,9 @@
 </head>
 <body>
 
-    <h1>Nota Fiscal</h1>
+    <h1>Informações de Venda</h1>
 
-    <h2>Informações da Compra</h2>
+    <h2>Informações Gerais</h2>
     <table class="table table-bordered">
         <tr>
             <th >ID da Compra</th>
@@ -42,6 +42,10 @@
         <tr>
             <th>Nome Completo</th>
             <td>{{ customer.name.title() }}</td>
+        </tr>
+        <tr>
+            <th>CPF</th>
+            <td>{{ customer.cpf }}</td>
         </tr>
         <tr>
             <th>Email</th>
@@ -88,7 +92,6 @@
                     <td>R${{ product['product_data'].price * product['sale_quantity']}}</td>
                 </tr>
             {% endfor %}
-            {% if sale.discount %}
             <tr>
                 <th colspan="4" class="text-center">Subtotal</td>
                 <td>R${{ subtotal }}</td>
@@ -97,7 +100,6 @@
                 <th colspan="4" class="text-center">Desconto</td>
                 <td>-R${{ discount }}</td>
             </tr>
-            {% endif%}
             <tr>
                 <th colspan="4" class="text-center">Total</td>
                 <td>R${{ total }}</td>

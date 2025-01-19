@@ -27,14 +27,16 @@ def login_required(func):
         return func(*args, **kwargs)
     return wrapper
 
-def adm_required(func):
+def adm_required(route:str='home.render_page'):
     '''
     Decorator que define uma rota que necessita que o usuário seja um administrador para receber uma request.
     '''
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if 'user_role' not in session.keys() and session['user_role'] not in ['master', 'admin']:
-            flash('Usuário necessita de um cargo administrativo para acessar essa página.')
-            return redirect(url_for())
-        return func(*args, **kwargs)
-    return wrapper
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if 'user_role' in session.keys() and session['user_role'] not in ['master', 'admin']:
+                flash('Usuário necessita de um cargo administrativo para acessar essa página.')
+                return redirect(url_for(route))
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

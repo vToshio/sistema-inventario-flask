@@ -14,7 +14,7 @@ class NewProductForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewProductForm, self).__init__(*args, **kwargs)
-        self.category_id.choices = [(cat.id, cat.desc) for cat in db.session.query(ProductCategory).all()]
+        self.category_id.choices = [(cat.id, cat.desc) for cat in ProductCategory.query.all() if cat.id]
 
 class AddUnitsForm(FlaskForm):
     id = HiddenField(name='id-produto-adicionar', id='id-produto-adicionar')
@@ -25,17 +25,20 @@ class EditProductForm(FlaskForm):
     id = HiddenField(id='id-produto-editar', name='id-produto-editar')
     desc = StringField('Descrição', id='desc-produto-editar', name='desc-produto-editar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=100)])
     price = FloatField('Preço', id='preco-produto-editar', name='preco-produto-editar', validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
-    category = SelectField('Categoria', id='select-categoria-editar', coerce=int, name='select-categoria-editar', choices=[], validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
+    category_id = SelectField('Categoria', id='select-categoria-editar', coerce=int, name='select-categoria-editar', choices=[], validators=[DataRequired(DATA_REQUIRED_MESSAGE)])
     submit = SubmitField('Editar Produto')
 
     def __init__(self, *args, **kwargs):
         super(EditProductForm, self).__init__(*args, **kwargs)
-        self.category.choices = [(cat.id, cat.desc) for cat in db.session.query(ProductCategory).all()]
+        self.category_id.choices = [(cat.id, cat.desc) for cat in ProductCategory.query.all() if cat.id]
 
+class EnableProductForm(FlaskForm):
+    id = IntegerField('ID do Produto', id='id-ativar-produto', name='id-ativar-produto', validators=[DataRequired()])
+    submit = SubmitField('Reativar Produto')
 
-class DeleteProductForm(FlaskForm):
-    id = HiddenField(id='id-produto-deletar', name='id-produto-deletar')
-    submit = SubmitField('Deletar Produto')
+class DisableProductForm(FlaskForm):
+    id = HiddenField(id='id-desativar-produto', name='id-desativar-produto')
+    submit = SubmitField('Desativar Produto')
 
 class NewCategoryForm(FlaskForm):
     desc = StringField('Descrição', id='desc-categoria-cadastrar', name='desc-categoria-cadastrar', validators=[DataRequired(DATA_REQUIRED_MESSAGE), Length(max=20)])

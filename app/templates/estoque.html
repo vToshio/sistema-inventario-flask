@@ -2,7 +2,6 @@
 
 {% block modal %}
 
-{% if categories %}
 <!-- Modal Deletar Categorias -->
 <section id="modal-deletar-categoria" class="modal" tabindex="-1">
     <div class="modal-dialog">
@@ -24,9 +23,7 @@
         </div>
     </div>
 </section>
-{% endif %}
-
-{% if products %}    
+   
 <!-- Adicionar Unidades dos Produtos -->
 <section id="modal-adicionar-unidades" class="modal" tabindex="-1">
     <div class="modal-dialog">
@@ -39,7 +36,6 @@
                     <div>
                         {{ add_units.csrf_token }}
                         {{ add_units.id() }}
-
                         {{ add_units.units.label(class='form-label') }} {{ add_units.units(class='form-control', placeholder='Insira um valor inteiro (Ex: 50, 20, 33...)') }}
                     </div>
                 </div> 
@@ -66,7 +62,7 @@
                     {{ edit_product.id() }}
                     {{ edit_product.desc.label(class='form-label') }} {{ edit_product.desc(class='form-control', placeholder='Descrição do Produto')}}
                     {{ edit_product.price.label(class='form-label') }} {{ edit_product.price(class='form-control', placeholder='Preço do Produto (Ex)') }}
-                    {{ edit_product.category.label(class='form-label') }} {{ edit_product.category(class='form-select') }}
+                    {{ edit_product.category_id.label(class='form-label') }} {{ edit_product.category_id(class='form-select') }}
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
@@ -77,42 +73,65 @@
     </div>
 </section>
 
-<!-- Modal Deletar Produtos -->
-<section id="modal-deletar-produto" class="modal" tabindex="-1">
+<!-- Modal Desativar Produtos -->
+<section id="modal-desativar-produto" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="titulo-modal-deletar-produto" class="modal-title"></h5>
+                <h5 id="titulo-modal-desativar-produto" class="modal-title"></h5>
             </div>
             <div class="modal-body">
                 <p>Deseja mesmo remover esse produto? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('inventory.delete_product') }}" method="post">
-                    {{ delete_product.csrf_token }}
-                    {{ delete_product.id() }}
+                <form action="{{ url_for('inventory.disable_product') }}" method="post">
+                    {{ disable_product.csrf_token }}
+                    {{ disable_product.id() }}
                     
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ delete_product.submit(class='btn btn-danger') }}
+                    {{ disable_product.submit(class='btn btn-danger') }}
                 </form>
             </div>
         </div>
     </div>
 </section>
-{% endif %}
+
+<section id="modal-reativar-produto" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Reativar Produto</h5>
+            </div>
+            <form action="{{ url_for('inventory.enable_product' )}}" method="post">
+                <div class="modal-body">
+                    {{ enable_product.csrf_token }}
+                    {{ enable_product.id(class='form-control', placeholder='ID do Produto') }}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ enable_product.submit(class='btn btn-primary')}}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
 
 {% endblock %}
 
 {% block content %}
 
 <h1>{{ pagetitle }}</h1> 
+<input type="hidden" id="user_role" value="{{ session['user_role'] }}">
 
 <div id="container-todos">
     <div id="botoes-estoque">
+        {% if session['logged_user'] in ['master', 'admin'] %}
         <button id="cadastrar-categoria" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadcat" aria-expanded="false" aria-controls="collapse-cadcat" type="button">Cadastrar Categoria</button>
-        {% if categories %}
-        <button id="cadastrar-produto" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>
-        <button id="excluir-categoria" class="btn btn-danger" data-bs-toggle="collapse" data-bs-target="#collapse-delcat" aria-expanded="false" aria-controls="collapse-delcad" type="button">Deletar Categoria</button>
+            {% if categories %}
+            <button id="cadastrar-produto" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>
+            <button id="reativar-produto" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-reativar-produto">Reativar Produto</button>
+            <button id="excluir-categoria" class="btn btn-danger" data-bs-toggle="collapse" data-bs-target="#collapse-delcat" aria-expanded="false" aria-controls="collapse-delcad" type="button">Deletar Categoria</button>
+            {% endif %}
         {% endif %}
 
         <input id="barra-pesquisa" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
@@ -162,8 +181,8 @@
         <button id="proxima" class="btn btn-secondary" type="button">proxima</button>
     </div>
     <div id="tabela-estoque">
-        <table class="table">
-            <thead>
+        <table class="table table-responsive table-hover text-center">
+            <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
                     <th scope="col">Descrição</th>

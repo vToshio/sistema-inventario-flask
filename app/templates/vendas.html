@@ -29,7 +29,7 @@
                     <div id="container-produtos">
                         <!-- Campos adicionados de forma dinâmica -->
                     </div>
-                    <button type="button" class="btn btn-secondary" id="add-product">Add Product</button>
+                    <button type="button" class="btn btn-secondary" id="botao-adicionar-produto">Adicionar Produto</button>
                 </div>
 
                 {{ new_sale.submit(class="btn btn-primary") }}
@@ -44,7 +44,7 @@
 
     
     <div id="tabela-vendas" class="text-center">
-        <table class="table">
+        <table class="table table-responsive table-hover text-center">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
@@ -65,5 +65,5 @@
 {% endblock%}
 
 {% block js_imports %}
-<script src="{{ url_for('static', filename='javascript/sales.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/load_sales.js') }}"></script>
 {% endblock %}

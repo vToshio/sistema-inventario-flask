@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, jsonify, url_for, flash, get_flashed_messages, request, session
 from app.models import db, Product, ProductCategory
-from app.helpers import login_required, flash_messages
+from app.helpers import login_required, flash_messages, adm_required
 from app.src.inventory.forms import *
 
 inventory = Blueprint('inventory', __name__)
@@ -12,7 +12,7 @@ def render_page():
     Renderiza a página de gerenciamento de estoque.
     '''
     products = Product.query.first()
-    categories = ProductCategory.query.all()        
+    categories = [cat for cat in ProductCategory.query.all() if cat.id]        
 
     return render_template(
         'estoque.html',
@@ -20,7 +20,8 @@ def render_page():
         new_product = NewProductForm(),
         add_units = AddUnitsForm(),
         edit_product = EditProductForm(),
-        delete_product = DeleteProductForm(),
+        enable_product = EnableProductForm(),
+        disable_product = DisableProductForm(),
         new_category = NewCategoryForm(),
         delete_category = DeleteCategoryForm(), 
         messages = get_flashed_messages(), 
@@ -60,7 +61,7 @@ def get_products():
             'quantity' : product.quantity,
             'price' : product.price
         }
-        for product in products.items
+        for product in products.items if product.status
     ]
 
     return jsonify(
@@ -90,7 +91,7 @@ def get_categories():
             'id' : category.id,
             'desc' : category.desc.title()
         }
-        for category in categories
+        for category in categories if category.id
     ]
 
     return jsonify({'categories' : cat_list})
@@ -123,6 +124,7 @@ def search_products():
         {
             'id': product.id,
             'desc' : product.desc.title(),
+            'status' : product.status,
             'category_id' : product.category.id,
             'category' : product.category.desc.title(),
             'quantity' : product.quantity,
@@ -189,13 +191,18 @@ def add_units():
     if form.validate_on_submit():
         id = form.id.data
         units = form.units.data
-    
-        try:
-            product = Product.query.filter_by(id=id).first()
         
+        try:
+            if units < 0:
+                raise Exception('A quantidade de unidades adicionadas deve ser positiva.')
+
+            product = Product.query.filter_by(id=id).first()
+
             if not product:
                 raise Exception('Produto não encontrado na base de dados.')
-       
+            elif not product.status:
+                raise Exception('Não é possível adicionar unidades de produtos desativados. ')
+
             product = db.session.query(Product).filter_by(id=id).first()
             product.quantity += units
             db.session.commit()
@@ -209,6 +216,7 @@ def add_units():
 
 @inventory.route('/api/products/edit', methods=['POST'])
 @login_required
+@adm_required(route='inventory.render_page')
 def edit_product():
     '''
     Rota da API que redefine os dados de um produto (já cadastrado), por meio do método POST.
@@ -224,14 +232,17 @@ def edit_product():
         id = form.id.data
         desc = form.desc.data
         price = form.price.data
-        category_id = form.category.data
+        category_id = form.category_id.data
 
         try:
             product = Product.query.filter_by(id=id).first()
 
             if not product:
                 raise Exception(f'Produto "{desc}" não encontrado na base de dados')
-            
+            elif not product.status:
+                raise Exception('Não é possível editar um produto desativado.')
+
+
             product.desc = desc
             product.price = price
             product.category_id = category_id
@@ -243,14 +254,43 @@ def edit_product():
         flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
 
-
-@inventory.route('/api/products/delete', methods=['POST'])
+@inventory.route('/api/products/enable', methods=['POST'])
+@adm_required(route='inventory.render_page')
 @login_required
-def delete_product():
+def enable_product():
     '''
-    Rota da API que deleta um produto do banco de dados, por método POST.
+    Rota da API que reativa um produto no estoque.
     '''
-    form = DeleteProductForm()
+    form = EnableProductForm()
+
+    if form.validate_on_submit():
+        id = form.id.data
+
+        try:
+            product = Product.query.filter_by(id=id).first()
+
+            if not product:
+                raise Exception(f'Produto não cadastrado no banco de dados.')
+            elif product.status:
+                raise Exception(f'Produto de ID {id} já está ativo.')
+            
+            product.status = 1
+            db.session.commit()
+            flash(f'Produto "{product.desc.title()}" reativado com sucesso!')
+        except Exception as e:
+            flash(f'Erro ao reativar produto - {e}')
+    else:
+        flash_messages(form.errors)
+    return redirect(url_for('inventory.render_page'))
+
+@inventory.route('/api/products/disable', methods=['POST'])
+@adm_required(route='inventory.render_page')
+@login_required
+def disable_product():
+    '''
+    Rota da API que muda o status de um produto para inativo, por método POST.
+    '''
+    form = DisableProductForm()
     
     if form.validate_on_submit():
         id = form.id.data
@@ -259,16 +299,17 @@ def delete_product():
 
             if not product:
                 raise Exception('Produto não cadastrado no banco de dados.')
+            elif not product.status:
+                raise Exception(f'O Produto de ID {id} já está desativado.')
             elif product.quantity > 0:
                 raise Exception('Ainda há unidades deste produto em estoque.')
             
-            desc = product.desc
-            db.session.query(Product).filter_by(id=id).delete()
+            product.status = 0
             db.session.commit()
-            flash(f'Produto "{desc}" deletado com sucesso!')
+            flash(f'Produto "{product.desc.title()}" desativado com sucesso!')
         except Exception as e:
             db.session.rollback()
-            flash(f'Erro ao deletar produto - {e}')
+            flash(f'Erro ao desativar produto - {e}')
     else:
         flash_messages(form.errors)
     return redirect(url_for('inventory.render_page'))
@@ -276,6 +317,7 @@ def delete_product():
 
 @inventory.route('/api/categories/new', methods=['POST'])
 @login_required
+@adm_required(route='inventory.render_page')
 def new_category():
     '''
     Rota da API que registra uma nova categoria, através do método POST.
@@ -305,6 +347,7 @@ def new_category():
 
 @inventory.route('/api/categories/delete', methods=['POST'])
 @login_required
+@adm_required(route='inventory.render_page')
 def delete_category():
     '''
     Rota da API que deleta uma categoria do banco de dados, por método POST.
@@ -315,14 +358,24 @@ def delete_category():
         id = form.id.data
 
         try:    
-            category = ProductCategory.query.filter_by(id=id).first()
-            desc = category.desc
+            if not id:
+                raise Exception('Essa categoria não pode ser deletada') 
             
+            category = ProductCategory.query.filter_by(id=id).first()
             if not category:
                 raise Exception('Categoria não existente no banco de dados.')
-            elif Product.query.filter_by(category_id=id).first():
-                raise Exception('Não é possível deletar essa categoria pois ela ainda possuí produtos associados à ela.')
             
+            products = Product.query.filter_by(category_id=category.id).all()
+            print(products)
+            
+            enabled_products = [product for product in products if product.status]
+            if enabled_products:
+                raise Exception('Não é possível deletar essa categoria pois ela ainda possui produtos ativos.')
+            
+            for prod in products:
+                prod.category_id = 0
+
+            desc = category.desc
             db.session.query(ProductCategory).filter_by(id=id).delete()
             db.session.commit()
             flash(f'Categoria "{desc}" deletada com sucesso!')
