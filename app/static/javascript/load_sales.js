@@ -33,15 +33,6 @@ const add_product_field = () => {
     index++;
 };
 
-const attach_event_listeners = (class_name, handler, handler_args) => {
-    const buttons = document.getElementsByClassName(class_name);
-
-    Array.from(buttons).forEach(btn => {
-        btn.removeEventListener('click');
-        btn.addEventListener('click', () => handler(handler_args));
-    });
-};
-
 const load_sales = async (page) => {
     try {
         const response = await fetch(`/api/sales?page=${page}&per_page=${per_page}`);

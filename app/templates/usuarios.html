@@ -35,7 +35,6 @@
                 <section class="modal-body">
                     {{ edit_user.name.label(class="form-label") }} {{ edit_user.name(class="form-control", placeholder="Nome Completo do Usuário.") }}
                     {{ edit_user.username.label(class="form-label") }} {{ edit_user.username(class="form-control", placeholder="Nome de Acesso do Usuário.")}}
-                    {{ edit_user.role_id.label(class="form-label") }} {{ edit_user.role_id(class="form-select") }}
                     {{ edit_user.email.label(class="form-label") }} {{ edit_user.email(class="form-control", placeholder="exemplo@email.com") }}
                 </section>
                 <section class="modal-footer">
@@ -47,24 +46,65 @@
     </section>
 </section>
 
-<section id="modal-deletar-usuario" class="modal" tabindex="-1">
+<section id="modal-desativar-status" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="titulo-modal-deletar-usuario"></h5>
+                <h5 id="titulo-modal-desativar-status"></h5>
             </div>
             <div class="modal-body">
-                <p>Você quer mesmo deletar este usuário? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
+                <p>Ao desativar um usuário, ele não será visível na tabela de usuários. Você pode reativá-lo pela função "Reativar Usuário".</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('users.delete_user') }}" method="post">
-                    {{  delete_user.csrf_token }}
-                    {{ delete_user.id() }}
+                <form action="{{ url_for('users.disable_status') }}" method="post">
+                    {{ disable_status.csrf_token }}
+                    {{ disable_status.id() }}
 
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ delete_user.submit(class="btn btn-danger")}}
+                    {{ disable_status.submit(class="btn btn-danger")}}
                 </form>
             </div>
+        </div>
+    </div>
+</section>
+
+<section id="modal-reativar-usuario" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-reativar-usuario">Reativar Usuário</h5>
+            </div>
+            <form action="{{ url_for('users.enable_status')}}" method="post">
+                <div class="modal-body">
+                    {{ enable_status.csrf_token }}
+                    {{ enable_status.id(class='form-control', placeholder='ID do usuário')}}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+                    {{ enable_status.submit(class='btn btn-primary') }}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section id="modal-editar-cargo" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-editar-cargo"></h5>
+            </div>
+            <form action="{{ url_for('users.edit_role') }}" method="post">
+                {{ edit_role.csrf_token }}
+                {{ edit_role.id() }}
+                <div class="modal-body">
+                    {{ edit_role.role_id.label(class='form-label') }} {{ edit_role.role_id(class='form-select') }}    
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ edit_role.submit(class='btn btn-primary') }}
+                </div>
+            </form>
         </div>
     </div>
 </section>
@@ -72,10 +112,16 @@
 
 {% block content %}
 <h1>{{ pagetitle }}</h1>
+<input id="logged_user" type="hidden" value="{{ session['logged_user'] }}">
+<input id="user_role" type="hidden" value="{{ session['user_role'].title() }}">
 
 <div id="container-todos">
     <div id="botoes-estoque">
         <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-caduser" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Usuário</button>
+        <button id="reativar-usuario" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-reativar-usuario">Reativar Usuário</button>
+        
+        <input id="barra-pesquisa" type="text" placeholder="ID, Nome, Username, Cargo, Email">
+        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
     </div>
     
     <div id="container-collapses">
@@ -93,6 +139,11 @@
             </form>
         </div>
     </div>
+    
+    <div id="botoes-paginas">
+        <button id="botao-anterior" class="btn btn-secondary" type="button">Anterior</button>
+        <button id="botao-proxima" class="btn btn-secondary" type="button">Proximo</button>
+    </div>
 
     <div id="tabela-usuarios">
         <table class="table table-hover table-responsive text-center">
@@ -109,31 +160,6 @@
             </thead>
             <tbody id="body-tabela-usuarios" class="table-striped">
                 <!-- Linhas de registro de usuários -->
-                {% if not users %}
-                <tr><td colspan="7">Nenhum usuário cadastrado no banco de dados</td></tr>
-                {% else %}
-                    {% for user in users %}
-                    <tr class="text-center">
-                        <td scope="col">{{ user.id }}</td>
-                        <td scope="col">{{ user.name.title() }}</td>
-                        <td scope="col">{{ user.username }}</td>
-                        <td scope="col">{{ user.roles.desc.title() }}</td>
-                        <td scope="col">{{ user.email }}</td>
-                        <td scope="col">{{ user.date_created }}</td>
-                        {% if user.username == 'master' or (session['logged_user'] not in [user.username, 'master'] and user.roles.desc == 'admin') %}
-                        <td scope="col">---</tr>
-                        {% else %}
-                        <td scope="col">
-                            <button class="botao-mudar-senha btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-mudar-senha" data-id="{{ user.id }}" type="button">P</button>
-                            <button class="botao-editar-usuario btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-editar-usuario" data-id="{{ user.id }}" type="button">E</button>
-                            {% if session['logged_user'] != user.username %}
-                            <button class="botao-deletar-usuario btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-deletar-usuario" data-id="{{ user.id }}" data-username="{{ user.username }}" type="button">D</button>
-                            {% endif %}
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                {% endif %}    
             </tbody>
         </table>
     </div>
@@ -141,5 +167,5 @@
 {% endblock %}
 
 {% block js_imports %} 
-<script src="{{ url_for('static', filename='javascript/users.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/load_users.js') }}"></script>
 {% endblock %}

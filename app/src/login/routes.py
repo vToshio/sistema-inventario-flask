@@ -38,7 +38,7 @@ def validate_login():
         passwd = str(form.password.data)
         
         found_user = User.query.filter(User.username == username).first()
-        if found_user and bcrypt.check_password_hash(found_user.password, passwd):
+        if found_user and bcrypt.check_password_hash(found_user.password, passwd) and found_user.status:
             role = UserRole.query.filter_by(id=found_user.role_id).first()
             session['logged_user'] = username
             session['user_role'] = role.desc

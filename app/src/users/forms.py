@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, PasswordField, SubmitField, HiddenField, SelectField
+from wtforms import StringField, EmailField, IntegerField, PasswordField, SubmitField, HiddenField, SelectField
 from wtforms.validators import DataRequired, Length
 from app.models import db, UserRole
 
@@ -26,15 +26,23 @@ class EditUserForm(FlaskForm):
     id = HiddenField(id='id-editar-usuario', name='id-editar-usuario', validators=[DataRequired()])
     name = StringField('Nome Completo', id='nome-editar-usuario', name='nome-editar-usuario', validators=[DataRequired(), Length(max=50)])
     username = StringField('Nome de Acesso', id='username-editar-usuario', name='username-editar-usuario', validators=[DataRequired(), Length(max=20)])
-    role_id = SelectField('Cargo', id='select-editar-usuario', name='editar-usuario', choices=[], validators=[DataRequired()])
     email = EmailField('E-mail', id='email-editar-usuario', name='email-editar-usuario', validators=[DataRequired(), Length(max=50)])
     submit = SubmitField('Editar Usuário')
+    
+class EditRoleForm(FlaskForm):
+    id = HiddenField(id='id-editar-cargo', name='id-editar-cargo', validators=[DataRequired()])
+    role_id = SelectField('Cargo', id='select-editar-cargo', name='select-editar-cargo', choices=[], validators=[DataRequired()])
+    submit = SubmitField('Editar Cargo')
 
     def __init__(self, *args, **kwargs):
-        super(EditUserForm, self).__init__(*args, **kwargs)
+        super(EditRoleForm, self).__init__(*args, **kwargs)
         self.role_id.choices = [(role.id, role.desc) for role in db.session.query(UserRole).all() if role.desc != 'master']
 
 
-class DeleteUserForm(FlaskForm):
-    id = HiddenField(id='id-deletar-usuario', name='id-deletar-usuario')
-    submit = SubmitField('Deletar Usuário')
+class EnableStatusForm(FlaskForm):
+    id = IntegerField('ID do Usuário', id='id-ativar-status', name='id-ativar-status', validators=[DataRequired()])
+    submit = SubmitField('Reativar Usuário')
+
+class DisableStatusForm(FlaskForm):
+    id = HiddenField(id='id-desativar-status', name='id-desativar-status')
+    submit = SubmitField('Desativar Status')

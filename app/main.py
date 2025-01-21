@@ -32,6 +32,7 @@ def create_app() -> Flask:
             db.session.add(UserRole(desc='admin'))
             db.session.add(UserRole(desc='user'))
             db.session.add(User(
+                id=0,
                 name='Master',
                 username='master',
                 role_id=1, 

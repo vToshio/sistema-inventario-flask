@@ -142,7 +142,7 @@ const search_products = async () => {
             return;
         }
 
-        await products.forEach(product => {
+        products.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td scope="col">${product.id}</td>
