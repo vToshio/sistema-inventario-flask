@@ -5,13 +5,13 @@ const per_page = 10;
 let total;
 
 const enable_buttons = async (class_name) => {
-    await Array.from(document.getElementsByClassName(class_name)).forEach(btn => {
+    Array.from(document.getElementsByClassName(class_name)).forEach(btn => {
         btn.classList.remove('disabled');
     });
 };
 
 const disable_buttons = async (class_name) => {
-    await Array.from(document.getElementsByClassName(class_name)).forEach(btn => {
+    Array.from(document.getElementsByClassName(class_name)).forEach(btn => {
         btn.classList.add('disabled');
     });
 };
@@ -79,7 +79,7 @@ const attach_event_listeners = (class_name, handler, handler_args) => {
 
 const load_products = async (page) => {
     try {
-        const response = await fetch(`/api/products?page=${current_page}&per_page=${per_page}`);
+        const response = await fetch(`/api/products?page=${page}&per_page=${per_page}`);
         const data = await response.json();
         const products = Array.from(data.products);
 
@@ -121,6 +121,15 @@ const load_products = async (page) => {
             input_id : 'id-desativar-produto',
             prefix : 'Desativar'
         });
+
+        if (user_role === 'user') {
+            disable_buttons('botao-editar-produto');
+            disable_buttons('botao-desativar-produto');
+        } else {
+            enable_buttons('botao-editar-produto');
+            enable_buttons('botao-desativar-produto');
+        }
+
         current_page = data.page;
     } 
     catch (error) {
@@ -158,10 +167,18 @@ const search_products = async () => {
             `;
             table.appendChild(row);
 
+
+
             if (!product.status) {
                 disable_button(`botao-adicionar-unidades-${product.id}`);
                 disable_button(`botao-editar-produto-${product.id}`);
                 disable_button(`botao-desativar-produto-${product.id}`);
+            } 
+            else {
+                if (user_role in ['master', 'admin']) {
+                    disable_button(`botao-editar-produto-${product.id}`);
+                    disable_button(`botao-desativar-produto-${product.id}`);
+                }
             }
         });
         
@@ -207,14 +224,6 @@ try {
 /* Carregamento dos Produtos na Tabela*/ 
 document.addEventListener('DOMContentLoaded', async () => {
     await load_products(current_page);
-
-    if (user_role === 'user') {
-        disable_buttons('botao-editar-produto');
-        disable_buttons('botao-desativar-produto');
-    } else {
-        enable_buttons('botao-editar-produto');
-        enable_buttons('botao-desativar-produto');
-    }
    
     /* Barra de Pesquisa */
     document.getElementById('botao-pesquisa').addEventListener('click', () => search_products())

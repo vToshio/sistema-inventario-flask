@@ -125,7 +125,7 @@
 
 <div id="container-todos">
     <div id="botoes-estoque">
-        {% if session['logged_user'] in ['master', 'admin'] %}
+        {% if session['user_role'] in ['master', 'admin'] %}
         <button id="cadastrar-categoria" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadcat" aria-expanded="false" aria-controls="collapse-cadcat" type="button">Cadastrar Categoria</button>
             {% if categories %}
             <button id="cadastrar-produto" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadprod" aria-expanded="false" arial-controls="collapse-cadprod" type="button">Cadastrar Produto</button>

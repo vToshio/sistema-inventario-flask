@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, flash, get_flashed_messages, redirect, url_for, get_flashed_messages, session, request
 from app.helpers import login_required, flash_messages, adm_required
-from app.models import Customer, Sale, db
+from app.models import Customer, db
 from app.src.customers.forms import *
 
 customers = Blueprint('customers', __name__)

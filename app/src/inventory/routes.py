@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, redirect, jsonify, url_for, flash,
 from app.models import db, Product, ProductCategory
 from app.helpers import login_required, flash_messages, adm_required
 from app.src.inventory.forms import *
+from sqlalchemy import text
+
 
 inventory = Blueprint('inventory', __name__)
 
@@ -42,7 +44,7 @@ def get_products():
 
     Retorno:
     - JSON contendo:
-        - 'products' (list): lista de produtos
+        - 'products' (list): lista de dicionários com informações de um produto
         - 'page' (int): página atual
         - 'per_page' (int): quantidade de produtos por página
         - 'total' (int): quantidade total de produtos
@@ -56,10 +58,11 @@ def get_products():
         {
             'id' : product.id,
             'desc' : product.desc.title(),
+            'status' : product.status,
             'category_id' : product.category.id,
             'category' : product.category.desc.title(),
             'quantity' : product.quantity,
-            'price' : product.price
+            'price' : round(product.price, 2)
         }
         for product in products.items if product.status
     ]
@@ -110,32 +113,48 @@ def search_products():
     - JSON contendo:
         - 'products' (list): lista de produtos identificados pela query string
     '''
-    query = request.args.get('query', default='')
+    searched = request.args.get('query', default='')
 
-    products = Product.query.join(ProductCategory).filter(
-        ((Product.id == query) |
-        (Product.desc == query.lower()) |
-        (ProductCategory.desc == query.lower()) |
-        (Product.price == query) |
-        (Product.quantity == query))
-    ).all()
+    try:
+        query = f"""
+            SELECT prod.id as id, 
+                prod.desc as desc,
+                prod.category_id as category_id,
+                prod.status as status,
+                cat.desc as category,
+                prod.quantity as quantity,
+                ROUND(prod.price, 2) as price
+            FROM products prod
+            INNER JOIN product_categories cat ON prod.category_id = cat.id
+            WHERE prod.id LIKE '{searched}' OR
+                prod.desc LIKE '%{searched.lower()}%' OR
+                cat.desc LIKE '%{searched.lower()}%'
+            ORDER BY prod.id ASC;   
+        """
+        products = db.session.execute(text(query)).all()
+        
+        prod_list = []
+        if products:
+            prod_list = [
+                {
+                    'id': product.id,
+                    'desc' : product.desc.title(),
+                    'category_id' : product.category_id,
+                    'status' : product.status,
+                    'category' : product.category.title(),
+                    'quantity' : product.quantity,
+                    'price' : round(product.price, 2)
+                }
+                for product in products
+            ]
+        return jsonify({'products' : prod_list})
+    except Exception as e:
+        print(e)
+        flash(f'Erro ao realizar pesquisa de produto - {e}')
+        return redirect(url_for('inventory.render_page'))
 
-    prod_list = [
-        {
-            'id': product.id,
-            'desc' : product.desc.title(),
-            'status' : product.status,
-            'category_id' : product.category.id,
-            'category' : product.category.desc.title(),
-            'quantity' : product.quantity,
-            'price' : product.price
-        }
-        for product in products
-    ]
 
-    return jsonify({'products' : prod_list})
-
-
+from sqlalchemy import text
 @inventory.route('/api/products/new', methods=['POST'])
 @login_required
 def new_product():
