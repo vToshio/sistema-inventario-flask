@@ -3,9 +3,44 @@ from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 from typing import List, Dict
 from functools import wraps
+import random as r
+import string
 
 bcrypt = Bcrypt()
 csrf = CSRFProtect()
+
+def generate_random_password(length:int=16) -> str:
+    '''
+    Função auxiliar que gera uma senha aleatória contendo simbolos, letras maiúsculas ou minúsculas e dígitos numéricos.
+
+    Argumentos:
+    - lenght: define o tamanho da senha, com valor padrão 16.
+    '''
+
+    if (length > 100 or length<10):
+        raise Exception('A senha precisa tem entre 10 a 100 caracteres.')
+
+    upper = string.ascii_uppercase
+    lower = string.ascii_lowercase
+    signals = '!@#$%&*-+='
+    digits = '0123456789'
+    characters = [upper, lower, signals, digits]
+
+    password = ''
+    last = -1
+    for _ in range(length):
+        num = r.randint(0,3) 
+        if num == last:
+            if num < 1: 
+                num = num + r.randint(1, 3)
+            elif num > 3: 
+                num = num - r.randint(0, 2)
+        
+        new_char = characters[num][r.randint(0, len(characters[num])-1)]
+        password += new_char
+
+    return password
+
 
 def flash_messages(form_errors: Dict[str, List[str]]):
     '''

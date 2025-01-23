@@ -3,12 +3,13 @@ from datetime import datetime
 
 from app.models import db, User, UserRole, ProductCategory
 from app.src.login.routes import login
-from app.helpers import csrf, bcrypt
+from app.helpers import generate_random_password, csrf, bcrypt
 from app.src.home.routes import home
 from app.src.inventory.routes import inventory
 from app.src.customers.routes import customers
 from app.src.users.routes import users
 from app.src.sales.routes import sales
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -26,21 +27,37 @@ def create_app() -> Flask:
         db.init_app(app)
         db.create_all()
 
-        found_master = User.query.filter(User.username == 'master').first()
-        if not found_master:
+        roles = UserRole.query.all()
+        found_master = User.query.filter_by(username='master').first()
+        categories = ProductCategory.query.filter_by(id=0).first()
+
+        if not roles:
             db.session.add(UserRole(desc='master'))
             db.session.add(UserRole(desc='admin'))
             db.session.add(UserRole(desc='user'))
+            print('Categorias de usuário criadas com sucesso!')
+
+        if not found_master:
+            password = generate_random_password()
+
             db.session.add(User(
                 id=0,
                 name='Master',
                 username='master',
                 role_id=1, 
-                password=bcrypt.generate_password_hash('master123'),
+                password=bcrypt.generate_password_hash(password),
                 email='administrador_empresa@email.com', 
                 date_created=datetime.now())
             )
-            db.session.add(ProductCategory(id=0, desc='Não Registrada'))
-            db.session.commit()
+            print(f'[MASTER-PASSWORD] {password}')
+
+        if not categories:
+            db.session.add(ProductCategory(
+                id=0,
+                desc='Não Registrada')
+            )
+            print('Categoria "Não Registrada" adicionada!')
+
+        db.session.commit()
 
     return app
