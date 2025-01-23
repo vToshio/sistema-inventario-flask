@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, flash, get_flashed_messag
 from app.helpers import login_required, flash_messages, adm_required
 from app.models import Customer, db
 from app.src.customers.forms import *
+from sqlalchemy import text
 
 customers = Blueprint('customers', __name__)
 
@@ -98,6 +99,7 @@ def get_customer(id: int):
         {
             'name' : str(customer.name).title(),
             'cpf' : customer.cpf,
+            'status' : customer.status,
             'email' : customer.email,
             'address' : str(customer.address).title()
         }
@@ -117,28 +119,44 @@ def search_customers():
     - JSON contendo:
         - 'customers' (list): lista de clientes identificados pela query string.
     '''
-    query = request.args.get('query').strip()
+    searched  = request.args.get('query').strip()
 
-    clients = Customer.query.filter(
-        ((Customer.id == query) |
-         (Customer.name == query.lower()) |
-         (Customer.cpf == query) |
-         (Customer.email == query) |
-         (Customer.address == query.lower()))
-    ).all()
+    try:
+        query = f'''
+            SELECT customer.id as id,
+                   customer.name as name,
+                   customer.status as status,
+                   customer.cpf as cpf,
+                   customer.email as email,
+                   customer.address as address
+            FROM customers customer
+            WHERE customer.id LIKE '{searched}' OR
+                customer.name LIKE '%{searched}%' OR
+                customer.cpf LIKE '{searched}' OR
+                customer.email LIKE '{searched}' OR
+                customer.address LIKE '%{searched}%'
+            ORDER BY customer.id ASC;
+        '''
+        customers = db.session.execute(text(query)).all()
 
-    customers_list = [
-        {
-            'id' : customer.id,
-            'name' : str(customer.name).title(),
-            'cpf' : customer.cpf,
-            'email' : str(customer.email),
-            'address' : str(customer.address).title()
-        }
-        for customer in clients
-    ]
-
-    return jsonify({'customers' : customers_list})
+        customers_list = []
+        if customers:
+            customers_list.extend([
+                {
+                    'id' : customer.id,
+                    'name' : str(customer.name).title(),
+                    'cpf' : customer.cpf,
+                    'status' : customer.status,
+                    'email' : str(customer.email),
+                    'address' : str(customer.address).title()
+                }
+                for customer in customers
+            ])
+        return jsonify({'customers' : customers_list})
+    except Exception as e:
+        print(e)
+        flash(f'Erro ao pesquisar cliente - {e}')
+        return redirect(url_for('customers.render_page'))
 
 
 @customers.route('/api/customers/new', methods=['POST'])

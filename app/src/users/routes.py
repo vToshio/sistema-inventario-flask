@@ -85,7 +85,7 @@ def search_users():
 
         users_list = []
         if users: 
-            users_list = [
+            users_list.extend([
                 {
                     'id' : user.id,
                     'name' : str(user.name).title(),
@@ -97,7 +97,7 @@ def search_users():
                     'date_created' : user.date_created
                 }
                 for user in users
-            ]
+            ])
 
         return jsonify({'users' : users_list})
     except Exception as e:

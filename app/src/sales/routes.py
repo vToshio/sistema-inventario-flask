@@ -2,6 +2,7 @@ from flask import Blueprint, render_template,make_response, jsonify, flash, get_
 from app.helpers import login_required
 from app.models import db, User, Customer, Sale, Product, SaleProducts
 from app.src.sales.forms import *
+from sqlalchemy import text
 import pdfkit
 
 sales = Blueprint('sales', __name__)
@@ -97,26 +98,44 @@ def get_sales():
 @sales.route('/api/sales/search', methods=['GET'])
 @login_required
 def search_sale():
-    query = str(request.args.get('query')).strip()
+    searched = str(request.args.get('query')).lower().strip()
 
-    sales = Sale.query.join(User).join(Customer).filter(
-        ((Sale.id == query) |
-         (Customer.name == query.lower()) |
-         (User.name == query.lower()))
-    ).all()
+    try:
+        query = f'''
+            SELECT sale.id AS id,
+                customer.name AS customer,
+                user.name AS salesman,
+                STRFTIME('%d/%m/%Y', sale.sell_date) AS sell_date,
+                sale.total AS total
+            FROM sales sale 
+                INNER JOIN customers customer ON sale.customer_id = customer.id
+                INNER JOIN users user on sale.salesman_id = user.id
+            WHERE sale.id LIKE '{searched}' OR
+                customer.name LIKE '%{searched}%' OR
+                user.name LIKE '%{searched}%'
+            ORDER BY sale.id ASC;
+        '''
 
-    sales_list = [
-        {
-            'id' : sale.id,
-            'customer' : str(sale.customer.name).title(),
-            'salesman' : str(sale.salesman.name).title(),
-            'sell_date' : sale.sell_date.strftime('%d/%m/%Y'),
-            'total' : sale.total
-        }
-        for sale in sales
-    ]
+        sales = db.session.execute(text(query)).all()
 
-    return jsonify({'sales' : sales_list})
+        sales_list = []
+        if sales:
+            sales_list.extend([
+                {
+                    'id' : sale.id,
+                    'customer' : str(sale.customer).title(),
+                    'salesman' : str(sale.salesman).title(),
+                    'sell_date' : sale.sell_date,
+                    'total' : sale.total
+                }
+                for sale in sales
+            ])
+        return jsonify({'sales' : sales_list})
+    except Exception as e:
+        print(e)
+        flash(f'Erro ao pesquisar venda - {e}')
+        return redirect(url_for('sales.render_page'))
+
 
 @sales.route('/api/sales/register-sale', methods=['POST'])
 @login_required

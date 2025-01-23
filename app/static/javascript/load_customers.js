@@ -108,7 +108,7 @@ const search_clients = async () => {
                 </td>
             `;
             table.appendChild(row);
-
+            
             if (!customer.status) {
                 disable_button(`botao-editar-cliente-${customer.id}`);
                 disable_button(`botao-desativar-status-${customer.id}`)

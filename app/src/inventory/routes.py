@@ -135,7 +135,7 @@ def search_products():
         
         prod_list = []
         if products:
-            prod_list = [
+            prod_list.extend([
                 {
                     'id': product.id,
                     'desc' : product.desc.title(),
@@ -146,7 +146,7 @@ def search_products():
                     'price' : round(product.price, 2)
                 }
                 for product in products
-            ]
+            ])
         return jsonify({'products' : prod_list})
     except Exception as e:
         print(e)
