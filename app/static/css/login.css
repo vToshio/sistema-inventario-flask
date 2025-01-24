@@ -1,0 +1,18 @@
+.w-40 {
+    width: 40%;
+}
+
+.shadow-xl {
+    box-shadow:-15px 15px #6c757d;
+}
+
+@media (min-width: 450px) {
+    .w-sm-50 {
+        width: 50%;
+    }
+}
+
+h1, h2 {
+    font-family: sans-serif;
+    font-weight: bold;
+}

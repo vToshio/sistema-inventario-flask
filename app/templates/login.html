@@ -4,38 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
     <title>Login</title>
 </head>
 <body>
-    <main>
-        {% if messages %}
-        <section id="messages-panel">
-            <ul>
-            {% for cat, msg in messages %}
-                {% if cat == 'error' %}
-                <li class="error">{{ msg }}</li>
-                {% else %}
-                <li class="success">{{ msg }}</li>
-                {% endif %}
-            {% endfor %}
-            </ul>
+    <main class="d-flex vh-100">
+        <section class="d-flex align-items-center justify-content-center mx-auto w-75 bg-body-tertiary">
+            <div class="container rounded-5 text-dark shadow-xl w-sm-50 p-4 bg-dark-subtle">
+                <h2 class="text-center mb-4">Login</h2>
+                <form method="POST" action="{{ url_for('login.validate_login') }}">
+                    {{ form.csrf_token }}
+                    {{ form.nextpage(value=next) }}
+                    <div class="row md-2 w-40 mx-auto">
+                        {{ form.username.label(class="form-label m-0") }} {{ form.username(size=15, class="form-control", placeholder="Seu nome de usuário") }}
+                    </div>
+                    <div class="row mt-2 mb-4 w-40 mx-auto">
+                        {{ form.password.label(class="form-label m-0") }} {{ form.password(size=15, class="form-control", placeholder="Sua senha") }}
+                    </div>
+                    <div class="row m-2 justify-content-center text-center">
+                        {{ form.submit(class="btn btn-primary rounded-pill w-25 p-auto") }}
+                    </div>
+                </form>
+            </div>
         </section>
-        {% endif %}
 
-        <section>
-            <h1>Login</h1>
-            <form method="POST" action="{{ url_for('login.validate_login') }}">
-                {{ form.csrf_token }}
-                {{ form.nextpage(value=next) }}
-                <div>
-                    {{ form.username.label(class="form-label") }} {{ form.username(size=20, class="form-control") }}
-                </div>
-                <div>
-                    {{ form.password.label(class="form-label") }} {{ form.password(size=20, class="form-control") }}
-                </div>
-                {{ form.submit(class="btn btn-primary") }}
-            </form>
+        <section class="d-none d-sm-flex align-items-center justify-content-center w-50 h-100 bg-dark">
+            <div class="text-center text-light w-75">
+                <h1>Sistema de Gerenciamento de Estoque</h1>
+                <p>Desenvolvido por Vinícius Toshio A. Hayashida, 2025</p>
+            </div>
         </section>
     </main>
+    
+    {% if messages %}
+    <section id="toasts-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% set counter = 0 %}
+        {% for msg in messages %}
+        <div id="liveToast-{{ counter }}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Sistema</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ msg }}
+            </div>
+        </div>
+        {% set counter = counter + 1 %}
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if messages %}
+    <script src="{{ url_for('static', filename='./javascript/toasts.js')}}"></script>
+    {% endif %} 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>    
 </body>
 </html>

@@ -23,9 +23,9 @@ def render_page():
 
     return render_template(
         'login.html', 
-        next=url_for('home.render_page'), 
-        form=form, 
-        messages=get_flashed_messages(with_categories=True)
+        next = url_for('home.render_page'), 
+        form = form, 
+        messages = get_flashed_messages()
     )
 
 @login.route('/sistema/login/validate', methods=['POST'])
@@ -37,14 +37,19 @@ def validate_login():
         username = str(form.username.data)
         passwd = str(form.password.data)
         
-        found_user = User.query.filter(User.username == username).first()
-        if found_user and bcrypt.check_password_hash(found_user.password, passwd) and found_user.status:
+        try:
+            found_user = User.query.filter(User.username == username).first()
+            
+            if (not (found_user and bcrypt.check_password_hash(found_user.password, passwd) and found_user.status)):
+                raise Exception('Usuário ou senha inválidos')
+            
             role = UserRole.query.filter_by(id=found_user.role_id).first()
+            session['logged_in'] = True
             session['logged_user'] = username
             session['user_role'] = role.desc
             return redirect(url_for('home.render_page'))
-        else:
-            flash('Usuário ou senha inválidos.')
+        except Exception as e:
+            flash(f'Erro ao validar login - {e}')
     else:
         flash_messages(form.errors)
     return redirect(url_for('login.render_page', next=next))
@@ -57,6 +62,7 @@ def logout():
     Métodos: 
     - GET: finaliza a sessão do usuário logado no sistema.
     '''
+    session.pop('logged_in')
     session.pop('logged_user')
     session.pop('user_role')
     return redirect(url_for('login.render_page', next=url_for('home.render_page')))

@@ -56,7 +56,7 @@ def login_required(func):
     '''
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if'logged_user' not in session.keys() or session['logged_user'] is None:
+        if 'logged_in' not in session.keys() or not session['logged_in']:
             flash('Página inacessível enquanto o usuário não estiver logado.')
             return redirect(url_for('login.render_page'))
         return func(*args, **kwargs)
