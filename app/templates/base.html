@@ -4,41 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='./css/style.css')}}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/base.css')}}">
     <title>{{ pagetitle }}</title>
 </head>
-<body>
+<body class="bg-body-tertiary">
     {% block modal %} {% endblock %}
     
-    <main class="main-container d-flex">
-        
-        <section class="sidebar" id="side_nav">
-            <div>
-                <!-- Header Logo -->
-            </div>
-        
-            <ul>
+    <main class="d-flex vh-100">
+        <section id="side-nav" class="collapse collapse-horizontal in show bg-dark text-light">
+            <ul class="p-3">
                 <!-- Divisoria 1 -->
-                <li><a href="{{ url_for('home.render_page') }}">Home</a></li>
-                <li><a href="{{ url_for('inventory.render_page') }}">Estoque</a></li>
-                <li><a href="{{ url_for('customers.render_page') }}">Clientes</a></li>
-                <li><a href="{{ url_for('sales.render_page') }}">Vendas</a></li>
+                <li class="py-1"><a class="link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ url_for('home.render_page') }}"><i class="bi bi-house d-xl-inline d-none"></i> Home</a></li>
+                <li class="py-1"><a class="link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ url_for('inventory.render_page') }}"><i class="bi bi-box d-xl-inline d-none"></i> Estoque</a></li>
+                <li class="py-1"><a class="link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ url_for('customers.render_page') }}"><i class="bi bi-people d-xl-inline d-none"></i> Clientes</a></li>
+                <li class="py-1"><a class="link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ url_for('sales.render_page') }}"><i class="bi bi-journal-text d-xl-inline d-none"></i> Vendas</a></li>
             </ul>
             
             <hr>
             
-            <ul>
+            <ul class="p-3 text-center">
                 <!-- Divisoria 2 -->
                 {% if session['user_role'] in ['master', 'admin'] %}
-                <li><a href="{{ url_for('users.render_page') }}">Usuários</a></li>
+                <li class="p-1"><a class="link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ url_for('users.render_page') }}"><i class="bi bi-person-badge d-sm-inline d-none"></i> Usuários</a></li>
                 {% endif %}
-                <a href="{{ url_for('login.logout') }}">Logout</a>
+                <li class="py-1"><a class="link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ url_for('login.logout') }}"><i class="bi bi-box-arrow-left"> Logout</i></a></li>
+                <li><button type="button" class="btn btn-outline-light d-xl-none mt-5" data-bs-target="#side-nav" data-bs-toggle="collapse">
+                    <i class="bi bi-x"></i>
+                </button></li>
             </ul>
-
-        </section>
+        </section>        
         
-        
-        <section class="content">
+        <section class="content p-4 w-100">
+            <div class="sticky-bottom">
+                <button class="btn btn-outline-dark d-sm-none float-end" data-bs-toggle="collapse" data-bs-target="#side-nav" type="button"><i class="bi bi-list"></i></button>
+            </div>
             {% block content %} {% endblock %}
         </section>
 

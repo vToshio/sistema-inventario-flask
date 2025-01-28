@@ -45,27 +45,26 @@ const populate_select = async () => {
     };
 };
 
-const handleClick = (event, {title_id, input_id, prefix}) => {
-    const id = event.target.dataset.id;
-    const desc = event.target.dataset.desc;
+const handleClick = async (event, {title_id, input_id, prefix}) => {
+    const id = event.currentTarget.dataset.id;
+    const response = await fetch(`/api/products/${id}`);
+    const data = await response.json();
 
-    document.getElementById(title_id).textContent = `${prefix} ${desc}`;
-    document.getElementById(input_id).value = id;
+    document.getElementById(title_id).textContent = `${prefix} ${data.product.desc}`;
+    document.getElementById(input_id).value = data.product.id;
 };
 
 const handleClickEdit = async (event, {prefix}) => {
-    const id = event.target.dataset.id;
-    const desc = event.target.dataset.desc;
-    const price = event.target.dataset.price;
-    const category_id = event.target.dataset.categoryid;
+    const id = event.currentTarget.dataset.id;
+    const response = await fetch(`/api/products/${id}`);
+    const data = await response.json();
 
     document.getElementById('titulo-modal-editar-produto').textContent = `${prefix}`;
-    document.getElementById('id-produto-editar').value = id;
-    document.getElementById('desc-produto-editar').value = desc;
-    document.getElementById('preco-produto-editar').value = price;
-
+    document.getElementById('id-produto-editar').value = data.product.id;
+    document.getElementById('desc-produto-editar').value = data.product.desc;
+    document.getElementById('preco-produto-editar').value = data.product.price;
     await populate_select();
-    document.getElementById('select-categoria-editar').value = category_id;
+    document.getElementById('select-categoria-editar').value = data.product.category_id;
 };
 
 const attach_event_listeners = (class_name, handler, handler_args) => {
@@ -74,6 +73,54 @@ const attach_event_listeners = (class_name, handler, handler_args) => {
     Array.from(buttons).forEach(btn => {
         btn.removeEventListener('click', handler);
         btn.addEventListener('click', (event) => handler(event, handler_args));
+    });
+};
+
+const render_products = async (products) => {
+    table.innerHTML = '';
+
+    products.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td scope="col">${product.id}</td>
+            <td scope="col">${product.desc}</td>
+            <td scope="col">${product.category}</td>
+            <td scope="col">${product.quantity}</td>
+            <td scope="col">${product.price}</td> 
+            <td scope="col">
+                <button id="botao-adicionar-unidades-${product.id}" class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button"><i class="bi bi-plus-circle"></i></button>
+                <button id="botao-editar-produto-${product.id}" class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button"><i class="bi bi-pencil"></i></button>
+                <button id="botao-desativar-produto-${product.id}" class="botao-desativar-produto btn btn-danger" data-id="${product.id}" data-bs-toggle="modal" data-bs-target="#modal-desativar-produto" type="button"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+
+        table.appendChild(row);
+
+        if (!product.status) {
+            disable_button(`botao-adicionar-unidades-${product.id}`);
+            disable_button(`botao-editar-produto-${product.id}`);
+            disable_button(`botao-desativar-produto-${product.id}`);
+        } 
+        else {
+            if (!(['master', 'admin'].includes(user_role))) {
+                disable_button(`botao-editar-produto-${product.id}`);
+                disable_button(`botao-desativar-produto-${product.id}`);
+            }
+        }
+    });
+
+    attach_event_listeners('botao-adicionar-unidades', handleClick, {
+        title_id : 'titulo-modal-adicionar-unidades',
+        input_id : 'id-produto-adicionar',
+        prefix : 'Adicionar'
+    });
+    attach_event_listeners('botao-editar-produto', handleClickEdit, { 
+        prefix : 'Editar Produto'
+    });
+    attach_event_listeners('botao-desativar-produto', handleClick, {
+        title_id : 'titulo-modal-desativar-produto',
+        input_id : 'id-desativar-produto',
+        prefix : 'Desativar'
     });
 };
 
@@ -90,45 +137,7 @@ const load_products = async (page) => {
             return;
         }
 
-        products.forEach(product => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td scope="col">${product.id}</td>
-                <td scope="col">${product.desc}</td>
-                <td scope="col">${product.category}</td>
-                <td scope="col">${product.quantity}</td>
-                <td scope="col">${product.price}</td> 
-                <td scope="col">
-                    <button class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
-                    <button class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
-                    <button class="botao-desativar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-desativar-produto" type="button">R</button>
-                </td>
-            `;
-
-            table.appendChild(row);
-        });
-
-        attach_event_listeners('botao-adicionar-unidades', handleClick, {
-            title_id : 'titulo-modal-adicionar-unidades',
-            input_id : 'id-produto-adicionar',
-            prefix : 'Adicionar'
-        });
-        attach_event_listeners('botao-editar-produto', handleClickEdit, { 
-            prefix : 'Editar Produto'
-        });
-        attach_event_listeners('botao-desativar-produto', handleClick, {
-            title_id : 'titulo-modal-desativar-produto',
-            input_id : 'id-desativar-produto',
-            prefix : 'Desativar'
-        });
-
-        if (user_role === 'user') {
-            disable_buttons('botao-editar-produto');
-            disable_buttons('botao-desativar-produto');
-        } else {
-            enable_buttons('botao-editar-produto');
-            enable_buttons('botao-desativar-produto');
-        }
+        render_products(products);
 
         current_page = data.page;
     } 
@@ -151,57 +160,7 @@ const search_products = async () => {
             return;
         }
 
-        products.forEach(product => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td scope="col">${product.id}</td>
-                <td scope="col">${product.desc}</td>
-                <td scope="col">${product.category}</td>
-                <td scope="col">${product.quantity}</td>
-                <td scope="col">${product.price}</td> 
-                <td scope="col">
-                    <button id="botao-adicionar-unidades-${product.id}" class="botao-adicionar-unidades btn btn-primary" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-adicionar-unidades" type="button">A</button>
-                    <button id="botao-editar-produto-${product.id}" class="botao-editar-produto btn btn-secondary" data-id="${product.id}" data-desc="${product.desc}" data-price='${product.price}' data-categoryid=${product.category_id} data-bs-toggle="modal" data-bs-target="#modal-editar-produto" type="button">E</button>
-                    <button id="botao-desativar-produto-${product.id}"  class="botao-desativar-produto btn btn-danger" data-id="${product.id}" data-desc="${product.desc}" data-bs-toggle="modal" data-bs-target="#modal-desativar-produto" type="button">R</button>
-                </td>
-            `;
-            table.appendChild(row);
-
-
-
-            if (!product.status) {
-                disable_button(`botao-adicionar-unidades-${product.id}`);
-                disable_button(`botao-editar-produto-${product.id}`);
-                disable_button(`botao-desativar-produto-${product.id}`);
-            } 
-            else {
-                if (user_role in ['master', 'admin']) {
-                    disable_button(`botao-editar-produto-${product.id}`);
-                    disable_button(`botao-desativar-produto-${product.id}`);
-                }
-            }
-        });
-        
-        attach_event_listeners('botao-adicionar-unidades', handleClick, {
-            title_id : 'titulo-modal-adicionar-unidades',
-            input_id : 'id-produto-adicionar',
-            prefix : 'Adicionar'
-        });
-        attach_event_listeners('botao-editar-produto', handleClickEdit, {
-            title_id : 'titulo-modal-editar-produto',
-            input_id : 'id-produto-editar-produto',
-            prefix : 'Editar'
-        });
-        attach_event_listeners('botao-desativar-produto', handleClick, {
-            title_id : 'titulo-modal-desativar-produto',
-            input_id : 'id-desativar-produto',
-            prefix : 'Desativar'
-        });
-
-        if (user_role === 'user') {
-            disable_buttons('botao-editar-produto');
-            disable_buttons('botao-desativar-produto');
-        }
+        render_products(products);
     }
     catch (error) {
         console.error('Erro na pesquisa de produtos: ', error)

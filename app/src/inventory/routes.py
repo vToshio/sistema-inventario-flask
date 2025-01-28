@@ -32,6 +32,45 @@ def render_page():
         session = session
     )
 
+@inventory.route('/api/products/<int:id>', methods=['GET'])
+@login_required
+def get_product(id: int):
+    '''
+    Rota da API que retorna os dados de um produto através de um request por método GET
+
+    ARGS:
+    - id (int): id de um produto
+
+    RETORNO:
+    - Json contendo:
+        - id (int): id do produto
+        - desc (str): descrição do produto
+        - price (float): valor do produto
+        - category_id (int): id da categoria de um produto
+    '''
+    try:
+        if not isinstance(id, int):
+            raise Exception('Parâmetro não é um inteiro.')
+
+        product = Product.query.filter_by(id=id).first()
+
+        if not product: 
+            raise Exception('Produto não encontrado no banco de dados.')
+            
+
+        return jsonify({
+            'product' : {
+                'id' : product.id,
+                'desc' : str(product.desc).title(),
+                'price' : product.price,
+                'category_id' : product.category_id
+            }
+        })
+    except Exception as e:
+        print(e)
+        flash(f'Erro ao obter produto - {e}')
+        return redirect(url_for('inventory.render_page'))
+
 @inventory.route('/api/products', methods=['GET'])
 @login_required
 def get_products():
