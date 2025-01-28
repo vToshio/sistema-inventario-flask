@@ -188,7 +188,7 @@
         {% if session['user_role'] in ['master', 'admin'] %}
         <div class="d-xl-none float-start">
             <div class="dropdown">
-                <button type="button" class="btn btn-outline-secondary drowpdown-toggle" data-bs-toggle="dropdown">Funções</button>
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Funções</button>
                 <ul class="dropdown-menu dropdown-menu-dark">
                     {% if session['user_role'] in ['master', 'admin'] %} 
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-categoria">Cadastrar Categoria</button></li>
@@ -229,7 +229,7 @@
 
     
     <div id="tabela-estoque" class="d-flex table-responsive w-100 mt-5">
-        <table class="table table-responsive table-hover text-center">
+        <table class="table table-hover text-center">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
@@ -247,9 +247,9 @@
     </div>
 </div>
 
-<div class="text-center" id="botoes-paginas">
-    <button id="anterior" class="btn btn-secondary" type="button">Anterior</button>
-    <button id="proxima" class="btn btn-secondary" type="button">Próxima</button>
+<div class="text-center m-2" id="botoes-paginas">
+    <button id="botao-anterior" class="btn btn-secondary" type="button">Anterior</button>
+    <button id="botao-proxima" class="btn btn-secondary" type="button">Próxima</button>
 </div>
 {% endblock%}
 

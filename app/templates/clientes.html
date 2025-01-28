@@ -1,6 +1,30 @@
 {% extends "base.html" %}
 
 {% block modal %}
+<!-- Modal Cadastrar Cliente -->
+<section id="modal-cadastrar-cliente" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cadastrar Cliente</h5>
+            </div>
+            <form action="{{ url_for('customers.new_customer') }}" method="post">
+                {{ new_customer.csrf_token }}
+                <div class="modal-body">
+                    {{ new_customer.name.label(class="form-label") }} {{ new_customer.name(class="form-control", placeholder='Nome Completo') }}
+                    {{ new_customer.cpf.label(class="form-label") }} {{ new_customer.cpf(class="form-control", placeholder="Apenas números")}}
+                    {{ new_customer.email.label(class="form-label") }} {{ new_customer.email(class="form-control", placeholder='exemplo@gmail.com') }}
+                    {{ new_customer.address.label(class="form-label") }} {{ new_customer.address(class="form-control", placeholder='Endereço Atual') }}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ new_customer.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
 <!-- Modal Editar Cliente-->
 {% if customers %}
 <section id="modal-editar-cliente" class="modal" tabindex="-1">
@@ -76,39 +100,41 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ pagetitle }}</h1>
-
 <div class="container-todos">
-    <div id="botoes-clientes">
-        <button id="cadastrar-cliente" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-cadcli">Cadastrar Cliente</button>
-        {% if session['user_role'] in ['master', 'admin'] %}
-        <button class="botao-reativar-cliente btn btn-primary"  data-bs-toggle="modal" data-bs-target="#modal-reativar-cliente">Reativar Cliente</button>
-        {% endif %}
+    <h1>{{ pagetitle }}</h1>
+    
+    <div class="d-block w-100 mt-3">
+        <!-- Fullscreen -->
+        <div id="botoes-clientes" class="d-none d-xl-flex btn-group float-start">
+            <button id="cadastrar-cliente" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-cliente">Cadastrar Cliente</button>
+            {% if session['user_role'] in ['master', 'admin'] %}
+            <button class="botao-reativar-cliente btn btn-primary"  data-bs-toggle="modal" data-bs-target="#modal-reativar-cliente">Reativar Cliente</button>
+            {% endif %}
+        </div>
 
-        <input id="barra-pesquisa" type="search" placeholder="Pesquisar Cliente (id, descrição, email, endereço)">
-        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
-    </div>
+        <!-- Mobile -->
+        <div class="d-xl-none float-start">
+            <div class="dropdown">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Funções</button>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-cliente">Cadastrar Cliente</button></li>
+                    {% if session['user_role'] in ['master', 'admin'] %}
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-reativar-cliente">Reativar Cliente</button></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
 
-    <div id="container-collapses">
-        <div class="collapse" id="collapse-cadcli">
-            <form action="{{url_for('customers.new_customer')}}" method="post" class="card card-body">
-                {{ new_customer.csrf_token }}
-                {{ new_customer.name.label(class="form-label") }} {{ new_customer.name(class="form-control", placeholder='Nome Completo') }}
-                {{ new_customer.cpf.label(class="form-label") }} {{ new_customer.cpf(class="form-control", placeholder="Apenas números")}}
-                {{ new_customer.email.label(class="form-label") }} {{ new_customer.email(class="form-control", placeholder='exemplo@gmail.com') }}
-                {{ new_customer.address.label(class="form-label") }} {{ new_customer.address(class="form-control", placeholder='Endereço Atual') }}
-                {{ new_customer.submit(class="btn btn-primary") }}
-            </form>
+        <div class="input-group mb-2 w-50 float-end">
+            <input id="barra-pesquisa" class="form-control" type="search" placeholder="Pesquisar Cliente (id, descrição, email, endereço)">
+            <button id="botao-pesquisa" class="btn btn-outline-primary" type="button">Pesquisar</button>
+            <a href="{{ url_for('customers.render_page') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
         </div>
     </div>
-    
-    <div id="botoes-paginacao">
-        <button id="anterior" type="button">anterior</button>
-        <button id="proxima" type="button">proxima</button>
-    </div>
 
-    <div id="tabela-clientes">
-        <table class="table table-responsive table-hover text-center">
+    
+    <div id="tabela-clientes" class="d-flex table-responsive w-100 mt-5">
+        <table class="table table-hover text-center">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
@@ -124,6 +150,11 @@
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="text-center m-2" id="botoes-paginas">
+    <button id="botao-anterior" class="btn btn-secondary" type="button">Anterior</button>
+    <button id="botao-proxima" class="btn btn-secondary" type="button">Próxima</button>
 </div>
 {% endblock%}
 

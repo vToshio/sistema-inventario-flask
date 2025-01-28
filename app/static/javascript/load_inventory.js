@@ -24,7 +24,6 @@ const enable_button = async (button_id) => {
     document.getElementById(button_id).classList.remove('disabled');
 }
 
-
 const populate_select = async () => {
     try {
         const response = await fetch('/api/categories');
@@ -130,7 +129,7 @@ const load_products = async (page) => {
         const data = await response.json();
         const products = Array.from(data.products);
 
-        table.innerHTML = '';
+        total = data.pages;
 
         if (products.length === 0) {
             table.innerHTML = '<tr><td colspan="6">Nenhum produto cadastrado ou ativo no sistema.</td></tr>';
@@ -138,8 +137,7 @@ const load_products = async (page) => {
         }
 
         render_products(products);
-
-        current_page = data.page;
+        current_page = page;
     } 
     catch (error) {
         console.error('Erro no carregamento dos produtos: ', error);
@@ -188,12 +186,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('botao-pesquisa').addEventListener('click', () => search_products())
     
     /* Botões de Paginação*/
-    document.getElementById('anterior').addEventListener('click', () => {
-        if (current_page>1) 
-            load_products(current_page-1);
-    })
-    document.getElementById('proxima').addEventListener('click', () => {
-        if (current_page<total)
-            load_products(current_page+1);
-    })
+    document.getElementById('botao-anterior').addEventListener('click', () => {
+        if (current_page>1) {
+            current_page--;
+            load_products(current_page);
+        }
+    });
+    document.getElementById('botao-proxima').addEventListener('click', () => {
+        if (current_page<total){
+            current_page++;
+            load_products(current_page);
+        }
+    });
 });

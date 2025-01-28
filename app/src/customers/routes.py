@@ -83,8 +83,11 @@ def get_customer(id: int):
 
     Retorno:
     - JSON contendo:
-        - 'name' (str): nome completo do cliente,
-        - ''
+        - name (str): nome completo do cliente
+        - cpf (str): cpf do cliente
+        - status (bool): status do cliente
+        - email (str): email do cliente
+        - address (str): endereço do cliente
     '''
     if not isinstance(id, int):
         flash('O ID deve ser um número inteiro para realizar uma pesquisa por ID.')
@@ -97,6 +100,7 @@ def get_customer(id: int):
 
     return jsonify(
         {
+            'id' : customer.id,
             'name' : str(customer.name).title(),
             'cpf' : customer.cpf,
             'status' : customer.status,
@@ -206,12 +210,11 @@ def edit_customer():
     if form.validate_on_submit():
         id = form.id.data
         try:
-            if not customer.status:
-                raise Exception('Não é possível editar os dados de um cliente desativado.')
-
             customer = Customer.query.filter_by(id=id).first()
             if not customer:
                 raise Exception('Cliente não cadastrado no banco de dados.')
+            elif not customer.status:
+                raise Exception('Não é possível editar os dados de um cliente desativado.')
             
             customer.name = str(form.name.data).strip().lower()
             customer.address = str(form.address.data).strip().lower()
