@@ -49,8 +49,8 @@ const render_customers = (customers) => {
             <td scope="col">${customer.email}</td>
             <td scope="col">${customer.address}</td>
             <td scope="col">
-                <button id="botao-editar-cliente-${customer.id}" class="botao-editar-cliente btn btn-secondary" data-id="${customer.id}" data-bs-toggle="modal" data-bs-target="#modal-editar-cliente">E</button>
-                <button id="botao-desativar-status-${customer.id}" class="botao-desativar-status btn btn-danger" data-id="${customer.id}" data-name="${customer.name}" data-bs-toggle="modal" data-bs-target="#modal-desativar-status">D</button>
+                <button id="botao-editar-cliente-${customer.id}" class="botao-editar-cliente btn btn-secondary" data-id="${customer.id}" data-bs-toggle="modal" data-bs-target="#modal-editar-cliente"><i class="bi bi-pencil-square"></i></button>
+                <button id="botao-desativar-status-${customer.id}" class="botao-desativar-status btn btn-danger" data-id="${customer.id}" data-name="${customer.name}" data-bs-toggle="modal" data-bs-target="#modal-desativar-status"><i class="bi bi-archive"></i></button>
             </td>
         `;
         table.appendChild(row);

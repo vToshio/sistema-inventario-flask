@@ -10,6 +10,8 @@ users = Blueprint('users', __name__)
 @login_required
 @adm_required()
 def render_page():
+    users = [user for user in User.query.all() if user.id and user.status]
+
     return render_template(
         'usuarios.html', 
         pagetitle = 'Usuários',
@@ -25,7 +27,7 @@ def render_page():
     )
 
 
-@users.route('/api/users/get', methods=['GET'])
+@users.route('/api/users', methods=['GET'])
 @login_required
 @adm_required()
 def get_users():
@@ -105,7 +107,7 @@ def search_users():
         flash(f'Erro ao realizar pesquisa de usuários - {e}')
         return redirect(url_for('users.render_page'))
 
-@users.route('/api/users/get/<int:id>', methods=['GET'])
+@users.route('/api/users/<int:id>', methods=['GET'])
 @login_required
 @adm_required()
 def get_user(id: int):

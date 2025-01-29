@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block modal %}
+
+{% if users %}
+<!-- Modal Mudar Senha -->
 <section id="modal-mudar-senha" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -23,6 +26,7 @@
     </div>
 </section>
 
+<!-- Modal Editar Usuário -->
 <section id="modal-editar-usuario" class="modal" tabindex="-1">
     <section class="modal-dialog">
         <section class="modal-content">
@@ -46,6 +50,7 @@
     </section>
 </section>
 
+<!-- Modal Desativar Status -->
 <section id="modal-desativar-status" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -68,26 +73,7 @@
     </div>
 </section>
 
-<section id="modal-reativar-usuario" class="modal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="titulo-modal-reativar-usuario">Reativar Usuário</h5>
-            </div>
-            <form action="{{ url_for('users.enable_status')}}" method="post">
-                <div class="modal-body">
-                    {{ enable_status.csrf_token }}
-                    {{ enable_status.id(class='form-control', placeholder='ID do usuário')}}
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-                    {{ enable_status.submit(class='btn btn-primary') }}
-                </div>
-            </form>
-        </div>
-    </div>
-</section>
-
+<!-- Modal Editar Cargo -->
 <section id="modal-editar-cargo" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -108,45 +94,94 @@
         </div>
     </div>
 </section>
-{% endblock %}
+{% endif %}
 
-{% block content %}
-<h1>{{ pagetitle }}</h1>
-<input id="logged_user" type="hidden" value="{{ session['logged_user'] }}">
-<input id="user_role" type="hidden" value="{{ session['user_role'].title() }}">
-
-<div id="container-todos">
-    <div id="botoes-estoque">
-        <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-caduser" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Usuário</button>
-        <button id="reativar-usuario" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-reativar-usuario">Reativar Usuário</button>
-        
-        <input id="barra-pesquisa" type="text" placeholder="ID, Nome, Username, Cargo, Email">
-        <button id="botao-pesquisa" class="btn btn-primary" type="button">Pesquisar</button>
-    </div>
-    
-    <div id="container-collapses">
-        <!-- Cadastrar Usuário -->
-        <div class="collapse" id="collapse-caduser">
-            <form action="{{ url_for('users.new_user') }}" method="post" class="card card-body">
-                {{ new_users.csrf_token }}
-                {{ new_users.name.label(class="form-label")}} {{ new_users.name(class="form-control", placeholder="Nome completo do novo usuário.") }}
-                {{ new_users.username.label(class="form-label") }} {{ new_users.username(class="form-control", placeholder="Nome de acesso do usuário.") }}
-                {{ new_users.role_id.label(class="form-label") }} {{ new_users.role_id(class="form-select") }}
-                {{ new_users.email.label(class="form-label")}} {{ new_users.email(class="form-control", placeholder="exemplo@gmail.com")}}
-                {{ new_users.password.label(class="form-label") }} {{ new_users.password(class="form-control", placeholder="Senha de Acesso.") }}
-                {{ new_users.confirm_password.label(class="form-label") }} {{ new_users.confirm_password(class="form-control", placeholder="Confirmar Senha de Acesso.") }}
-                {{ new_users.submit(class="btn btn-primary") }}
+<!-- Modal Reativar Usuário -->
+<section id="modal-reativar-usuario" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="titulo-modal-reativar-usuario">Reativar Usuário</h5>
+            </div>
+            <form action="{{ url_for('users.enable_status')}}" method="post">
+                <div class="modal-body">
+                    {{ enable_status.csrf_token }}
+                    {{ enable_status.id(class='form-control', placeholder='ID do usuário')}}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+                    {{ enable_status.submit(class='btn btn-primary') }}
+                </div>
             </form>
         </div>
     </div>
-    
-    <div id="botoes-paginas">
-        <button id="botao-anterior" class="btn btn-secondary" type="button">Anterior</button>
-        <button id="botao-proxima" class="btn btn-secondary" type="button">Proximo</button>
-    </div>
+</section>
 
-    <div id="tabela-usuarios">
-        <table class="table table-hover table-responsive text-center">
+<section id="modal-cadastrar-usuario" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cadastrar Usuário</h5>
+            </div>
+            <form action="{{ url_for('users.new_user') }}" method="post">
+                {{ new_users.csrf_token }}
+                <div class="modal-body">
+                    {{ new_users.name.label(class="form-label")}} {{ new_users.name(class="form-control", placeholder="Nome completo do novo usuário.") }}
+                    <div class="row">
+                        <div class="col">
+                            {{ new_users.username.label(class="form-label") }} {{ new_users.username(class="form-control", placeholder="Nome de acesso do usuário.") }}
+                        </div>
+                        <div class="col">
+                            {{ new_users.role_id.label(class="form-label") }} {{ new_users.role_id(class="form-select") }}
+                        </div>
+                    </div>
+                    {{ new_users.email.label(class="form-label")}} {{ new_users.email(class="form-control", placeholder="exemplo@gmail.com")}}
+                    {{ new_users.password.label(class="form-label") }} {{ new_users.password(class="form-control", placeholder="Senha de Acesso.") }}
+                    {{ new_users.confirm_password.label(class="form-label") }} {{ new_users.confirm_password(class="form-control", placeholder="Confirmar Senha de Acesso.") }}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ new_users.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+
+<div id="container-todos" class="w-100">
+    <input id="logged_user" type="hidden" value="{{ session['logged_user'] }}">
+    <input id="user_role" type="hidden" value="{{ session['user_role'].title() }}">
+    <h1>{{ pagetitle }}</h1>
+    
+    <div class="d-block w-100 mt-3">
+        <!-- Fullscreen -->
+        <div id="botoes-estoque" class="d-none d-xl-flex btn-group float-start">
+            <button id="cadastrar-usuario" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-usuario" aria-expanded="false" aria-controls="collapse-caduser" type="button">Cadastrar Usuário</button>
+            <button id="reativar-usuario" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-reativar-usuario">Reativar Usuário</button>        
+        </div>
+
+        <!-- Mobile -->
+        <div class="dropdown d-xl-none float-start">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle">Funções</button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-usuario">Cadastrar Usuário</button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-reativar-usuario">Reativar Usuário</button></li>
+            </ul>
+        </div>
+        
+        <div id="pesquisa" class="input-group mb-2 w-50 float-end">
+            <input id="barra-pesquisa" class="form-control w-50" type="text" placeholder="ID, Nome, Username, Cargo, Email">
+            <button id="botao-pesquisa" class="btn btn-outline-primary" type="button"><i class="bi bi-search"></i></button>
+            <a href="{{ url_for('users.render_page') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+        </div>
+    </div>
+    
+    
+    <div id="tabela-usuarios" class="d-flex table-responsive w-100 mt-5">
+        <table class="table table-hover text-center">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
@@ -162,6 +197,11 @@
                 <!-- Linhas de registro de usuários -->
             </tbody>
         </table>
+    </div>
+    
+    <div id="botoes-paginas" class="text-center m-2">
+        <button id="botao-anterior" class="btn btn-secondary" type="button">Anterior</button>
+        <button id="botao-proxima" class="btn btn-secondary" type="button">Proximo</button>
     </div>
 </div>
 {% endblock %}
