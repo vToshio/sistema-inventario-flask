@@ -112,6 +112,7 @@ def search_sale():
                 INNER JOIN users user on sale.salesman_id = user.id
             WHERE sale.id LIKE '{searched}' OR
                 customer.name LIKE '%{searched}%' OR
+                customer.cpf LiKE '%{searched}%' OR
                 user.name LIKE '%{searched}%'
             ORDER BY sale.id ASC;
         '''

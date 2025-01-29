@@ -203,10 +203,10 @@
         </div>
         {% endif %}
         
-        <div id="pesquisa" class="input-group mb-2 w-35 float-end">
-            <input id="barra-pesquisa" class="form-control" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
+        <div id="pesquisa" class="input-group mb-2 w-50 float-end">
+            <input id="barra-pesquisa" class="form-control w-50" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
             <button id="botao-pesquisa" class="btn btn-outline-primary float-end" type="button"><i class="bi bi-search"></i></button>     
-            <a href="{{ url_for('inventory.render_page') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+            <a href="{{ url_for('inventory.render_page') }}" class="btn btn-outline-secondary d-none d-sm-inline"><i class="bi bi-arrow-clockwise"></i></a>
         </div>
     </div>
 

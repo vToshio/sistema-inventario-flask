@@ -1,46 +1,67 @@
 {% extends "base.html" %}
 
 {% block modal %}
+<section id="modal-registrar-venda" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Venda</h5>
+            </div>
+            <form action="{{ url_for('sales.register_sale') }}" method="post">
+                {{ new_sale.csrf_token }}
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col">
+                            {{ new_sale.customer_id.label(class="form-label") }} {{ new_sale.customer_id(class="form-control") }}
+                        </div>
+                        <div class="col">
+                            {{ new_sale.discount.label(class="form-label") }} {{ new_sale.discount(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            {{ new_sale.salesman_id.label(class="form-label") }} {{ new_sale.salesman_id(class="form-select") }}
+                        </div>
+                    </div>
 
+                    <div class="d-block w-100 mb-2">
+                        <label for="products" class="form-label">Produtos</label>
+                        <div id="container-produtos">
+                            <!-- Campos adicionados de forma dinâmica -->
+                        </div>
+                        <div class="w-100 text-center">
+                            <button type="button" class="btn btn-outline-secondary" id="botao-adicionar-produto">Adicionar Produto</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    {{ new_sale.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block content %}
 <h1>{{ pagetitle }}</h1>
 
 <div id="container-todos">
-    <div id="botoes-vendas">
-        <button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#collapse-regsale">Registrar Venda</button>
+    <div class="d-block w-100 mt-3">
+        <div id="botoes-vendas" class="float-start">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-registrar-venda">Registrar Venda</button>
+        </div>
         
-        <input id="barra-pesquisa" type="text" placeholder="ID, Cliente, Vendedor">
-        <button id="botao-pesquisa" type="button" class="btn btn-primary">Pesquisar</button>
-    </div>
-
-    <div id="container-collapses">
-        <div class="collapse" id="collapse-regsale">
-            <form action="{{ url_for('sales.register_sale') }}" method="post" class="card card-body">
-                {{ new_sale.csrf_token }}
-
-                {{ new_sale.customer_id.label(class="form-label") }} {{ new_sale.customer_id(class="form-control") }}
-                {{ new_sale.salesman_id.label(class="form-label") }} {{ new_sale.salesman_id(class="form-select") }}
-                {{ new_sale.discount.label(class="form-label") }} {{ new_sale.discount(class="form-select") }}
-
-                <div>
-                    <label for="products" class="form-label">Produtos</label>
-                    <div id="container-produtos">
-                        <!-- Campos adicionados de forma dinâmica -->
-                    </div>
-                    <button type="button" class="btn btn-secondary" id="botao-adicionar-produto">Adicionar Produto</button>
-                </div>
-
-                {{ new_sale.submit(class="btn btn-primary") }}
-            </form>
+        <div class="input-group mb-2 w-50 float-end">
+            <input id="barra-pesquisa" type="text" class="form-control w-50" placeholder="ID, Cliente, Vendedor">
+            <button id="botao-pesquisa" type="button" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+            <a href="{{ url_for('sales.render_page') }}" class="btn btn-outline-secondary d-none d-sm-inline"><i class="bi bi-arrow-clockwise"></i></a>
         </div>
     </div>
 
-    
-    
-    <div id="tabela-vendas" class="text-center">
-        <table class="table table-responsive table-hover text-center">
+    <div id="tabela-vendas" class="d-flex table-responsive w-100 mt-5">
+        <table class="table table-hover text-center">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
@@ -58,7 +79,7 @@
     </div>
 </div>
 
-<div id="botoes-paginas">
+<div id="botoes-paginas" class="text-center m-2">
     <button id="botao-anterior" class="btn btn-secondary" type="button">Anterior</button>
     <button id="botao-proxima" class="btn btn-secondary" type="button">Proximo</button>
 </div>

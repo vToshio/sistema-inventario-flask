@@ -126,9 +126,9 @@
         </div>
 
         <div class="input-group mb-2 w-50 float-end">
-            <input id="barra-pesquisa" class="form-control" type="search" placeholder="Pesquisar Cliente (id, descrição, email, endereço)">
-            <button id="botao-pesquisa" class="btn btn-outline-primary" type="button">Pesquisar</button>
-            <a href="{{ url_for('customers.render_page') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+            <input id="barra-pesquisa" class="form-control w-50" type="search" placeholder="Pesquisar Cliente (id, descrição, email, endereço)">
+            <button id="botao-pesquisa" class="btn btn-outline-primary" type="button"><i class="bi bi-search"></i></button>
+            <a href="{{ url_for('customers.render_page') }}" class="btn btn-outline-secondary d-none d-sm-inline"><i class="bi bi-arrow-clockwise"></i></a>
         </div>
     </div>
 

@@ -33,6 +33,25 @@ const add_product_field = () => {
     index++;
 };
 
+const render_sales = (sales) => {
+    table.innerHTML = '';
+
+    sales.forEach(sale => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td scope="col">${sale.id}</td>
+            <td scope="col">${sale.customer}</td>
+            <td scope="col">${sale.salesman}</td>
+            <td scope="col">${sale.sell_date}</td>
+            <td scope="col">${sale.total}</td>
+            <td scope="col">
+                <a class="botao-download btn btn-success" href="${download_url + sale.id}">Download</a>
+            </td>
+        `;
+        table.appendChild(row);
+    });
+};
+
 const load_sales = async (page) => {
     try {
         const response = await fetch(`/api/sales?page=${page}&per_page=${per_page}`);
@@ -47,20 +66,7 @@ const load_sales = async (page) => {
             return;
         }
 
-        sales.forEach(sale => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td scope="col">${sale.id}</td>
-                <td scope="col">${sale.customer}</td>
-                <td scope="col">${sale.salesman}</td>
-                <td scope="col">${sale.sell_date}</td>
-                <td scope="col">${sale.total}</td>
-                <td scope="col">
-                    <a class="botao-download btn btn-success" href="${download_url + sale.id}">Download</a>
-                </td>
-            `;
-            table.appendChild(row);
-        });
+        render_sales(sales);
         current_page = page;
     }
     catch (error) {
@@ -81,41 +87,29 @@ const search_sales = async () => {
         return;
     }
 
-    sales.forEach(sale => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td scope="col">${sale.id}</td>
-            <td scope="col">${sale.customer}</td>
-            <td scope="col">${sale.salesman}</td>
-            <td scope="col">${sale.sell_date}</td>
-            <td scope="col">${sale.total}</td>
-            <td scope="col">
-                <a class="botao-download btn btn-success" href="${download_url + sale.id}">Download</a>
-            </td>
-        `;
-        table.appendChild(row);
-    });
+    render_sales(sales);
 };
 
-document.getElementById('botao-anterior').addEventListener('click', () => {
-    if (current_page>1) {
-        current_page--;
-        load_sales(current_page);
-    }
-});
-
-document.getElementById('botao-proxima').addEventListener('click', () => {
-    if (current_page<total){
-        current_page++;
-        load_sales(current_page);
-    }
-});
-
-document.getElementById('botao-pesquisa').addEventListener('click', () => search_sales());
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     add_product_field();
     add_product_button.addEventListener('click', add_product_field);
     
-    load_sales(current_page);    
+    await load_sales(current_page);    
+    
+    /* Pesquisa */
+    document.getElementById('botao-pesquisa').addEventListener('click', () => search_sales());
+    
+    /* Paginação */
+    document.getElementById('botao-anterior').addEventListener('click', () => {
+        if (current_page>1) {
+            current_page--;
+            load_sales(current_page);
+        }
+    });
+    document.getElementById('botao-proxima').addEventListener('click', () => {
+        if (current_page<total){
+            current_page++;
+            load_sales(current_page);
+        }
+    });
 });
