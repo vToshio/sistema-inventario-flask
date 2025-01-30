@@ -1,0 +1,17 @@
+.digit-box {
+    font-weight: bold;
+    font-size: 40px;
+}
+
+.icon-container {
+    width: 80px;
+    height: 80px;
+    margin: 15px auto;
+    line-height: 70px;
+    border-radius: 20%;
+    border-width: 5px;
+}
+
+.icon-container i {
+    font-size: 30px;
+}

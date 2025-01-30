@@ -1,6 +1,126 @@
 {% extends "base.html" %}
 
+{% block css_imports %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css')}}">
+{% endblock %}
+
 {% block content %}
-<h1>Hello, World!</h1>
-<p>This is the {{ pagetitle }} page! Welcome {{ session['logged_user'] + ' ' + session['user_role'] }}</p>
+
+
+<div class="container w-100">
+    <div class="w-100">
+        <h1>Bem vindo, {{ name}}!</h1>
+        <p>As suas permissões de acesso e de exibições são de nível {{ role }}.</p>
+    </div>
+    <div class="row mt-5">
+        <!-- Quantidade de Produtos Registrados -->
+        <div class="col-lg-3 col-md-6 col-sm-12 card text-dark bg-body-tertiary shadow-lg mx-auto my-1">
+            <div class="text-center">
+                <div class="icon-container card">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="p-3">
+                    <div class="row">
+                        <span class="digit-box" data-number="{{ qt_products }}">000</span>
+                    </div>
+                    <div class="row">
+                        <span class="text-box my-2">Produtos em Estoque</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantidade de Vendas Registrados -->
+        <div class="col-lg-3 col-md-6 col-sm-12 card text-dark bg-body-tertiary shadow-lg mx-auto my-1">
+            <div class="text-center">
+                <div class="icon-container card ">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <div class="p-3">
+                    <div class="row">
+                        <span class="digit-box" data-number="{{ qt_sales }}">000</span>
+                    </div>
+                    <div class="row">
+                        <span class="text-box my-2">Vendas Realizadas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quantidade de Clientes Registrados -->
+        <div class="col-lg-3 col-md-6 col-sm-12 card text-dark bg-body-tertiary shadow-lg mx-auto my-1">
+            <div class="text-center">
+                <div class="icon-container card">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="p-3">
+                    <div class="row">
+                        <span class="digit-box" data-number="{{ qt_customers }}">000</span>
+                    </div>
+                    <div class="row">
+                        <span class="text-box my-2">Clientes Cadastrados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if session['user_role'] in ['master', 'admin'] %}
+    <div class="row mt-4">
+        <!-- Quantidade de Produtos Vendidos -->
+        <div class="col-lg-3 col-md-6 col-sm-12 card text-dark bg-body-tertiary shadow-lg mx-auto my-1">
+            <div class="text-center">
+                <div class="icon-container card">
+                    <i class="bi bi-person-bounding-box"></i>
+                </div>
+                <div class="p-3">
+                    <div class="row">
+                        <span class="digit-box" data-number="{{ qt_sale_products }}">000</span>
+                    </div>
+                    <div class="row">
+                        <span class="text-box my-2">Produtos Vendidos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantidade de Reais Obtidos -->
+        <div class="col-lg-3 col-md-6 col-sm-12 card text-dark bg-body-tertiary shadow-lg mx-auto my-1">
+            <div class="text-center">
+                <div class="icon-container card">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="p-3">
+                    <div class="row">
+                        <span class="digit-box" data-number="{{ total }}">000</span>
+                    </div>
+                    <div class="row">
+                        <span class="text-box my-2">Reais Obtidos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantidade de Colaboradores Cadastrados -->
+        <div class="col-lg-3 col-md-6 col-sm-12 card text-dark bg-body-tertiary shadow-lg mx-auto my-1">
+            <div class="text-center">
+                <div class="icon-container card">
+                    <i class="bi bi-person-bounding-box"></i>
+                </div>
+                <div class="p-3">
+                    <div class="row">
+                        <span class="digit-box" data-number="{{ qt_users }}">000</span>
+                    </div>
+                    <div class="row">
+                        <span class="text-box my-2">Colaboradores Ativos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block js_imports %}
+<script src="{{ url_for('static', filename='javascript/counters.js') }}"></script>
 {% endblock %}
