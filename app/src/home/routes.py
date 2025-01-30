@@ -21,8 +21,9 @@ def render_page():
         first_name += ch
 
     total = db.session.execute(text('SELECT SUM(sales.total) FROM sales;')).first()
-    products = db.session.execute(text('SELECT SUM(products.quantity) FROM products HAVING products.status = 1;')).first()
+    products = db.session.execute(text('SELECT SUM(products.quantity) FROM products GROUP BY products.quantity HAVING products.status = 1;')).first()
     sale_products = db.session.execute(text('SELECT SUM(products.quantity) FROM sale_products products;')).first()
+    print(sale_products)
     customers = Customer.query.filter_by(status=1).count()
     users = User.query.filter_by(status=1).count()
     sales = Sale.query.count()
@@ -32,11 +33,11 @@ def render_page():
         pagetitle='Home',
         name = first_name.title(),
         role = str(user.roles.desc).title(),  
-        session=session,
-        qt_products = products[0],
+        session = session,
         qt_sales = sales,
         qt_customers = customers,
-        qt_users = users-1,
-        qt_sale_products = sale_products[0],
-        total = floor(total[0])
+        qt_users = users-1 if users else 0,
+        qt_products = products[0] if products is not None else 0,
+        qt_sale_products = sale_products[0] if sale_products[0] is not None else 0  ,
+        total = floor(total[0]) if total[0] is not None else 0
     )
