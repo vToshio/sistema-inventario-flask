@@ -23,8 +23,7 @@ def render_page():
     total = db.session.execute(text('SELECT SUM(sales.total) FROM sales;')).first()
     products = db.session.execute(text('SELECT SUM(products.quantity) FROM products GROUP BY products.quantity HAVING products.status = 1;')).first()
     sale_products = db.session.execute(text('SELECT SUM(products.quantity) FROM sale_products products;')).first()
-    print(sale_products)
-    customers = Customer.query.filter_by(status=1).count()
+    customers = Customer.query.filter((Customer.status == 1) & (Customer.id > 0)).count()
     users = User.query.filter_by(status=1).count()
     sales = Sale.query.count()
 

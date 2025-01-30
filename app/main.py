@@ -1,7 +1,7 @@
 from flask import Flask
 from datetime import datetime
 
-from app.models import db, User, UserRole, ProductCategory
+from app.models import db, User, UserRole, ProductCategory, Customer
 from app.src.login.routes import login
 from app.helpers import generate_random_password, csrf, bcrypt
 from app.src.home.routes import home
@@ -30,6 +30,7 @@ def create_app() -> Flask:
         roles = UserRole.query.all()
         found_master = User.query.filter_by(username='master').first()
         categories = ProductCategory.query.filter_by(id=0).first()
+        unregistered_customer = Customer.query.filter_by(id=0).first()
 
         if not roles:
             db.session.add(UserRole(desc='master'))
@@ -57,6 +58,17 @@ def create_app() -> Flask:
                 desc='Não Registrada')
             )
             print('Categoria "Não Registrada" adicionada!')
+
+        if not unregistered_customer:
+            db.session.add(Customer(
+                id = 0,
+                name = 'Não Registrado',
+                cpf = '-',
+                email = '-',
+                address = '-'
+            ))
+            print('Usuário "Não Registrado" criado com sucesso!')
+
 
         db.session.commit()
 

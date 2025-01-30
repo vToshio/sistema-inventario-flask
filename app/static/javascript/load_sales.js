@@ -1,13 +1,14 @@
-const products_container = document.getElementById('container-produtos');
-const add_product_button = document.getElementById('botao-adicionar-produto');
+const users = document.getElementById('users').value;
+const products = document.getElementById('products').value;
 const table = document.getElementById('body-tabela-vendas');
 const download_url = '/sistema/home/vendas/';
 let index = 0;
 let total;
 let current_page = 1;
 const per_page = 10;
- 
+
 const add_product_field = () => {
+    const products_container = document.getElementById('container-produtos');
     const product_field = document.createElement('div');
 
     product_field.classList.add('product-field', 'mb-3');
@@ -91,8 +92,11 @@ const search_sales = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    add_product_field();
-    add_product_button.addEventListener('click', add_product_field);
+    if (parseInt(users) && parseInt(products)) {
+        const add_product_button = document.getElementById('botao-adicionar-produto');
+        add_product_field();
+        add_product_button.addEventListener('click', add_product_field);
+    }
     
     await load_sales(current_page);    
     

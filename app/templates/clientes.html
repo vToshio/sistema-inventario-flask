@@ -107,7 +107,7 @@
         <!-- Fullscreen -->
         <div id="botoes-clientes" class="d-none d-xl-flex btn-group float-start">
             <button id="cadastrar-cliente" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-cliente">Cadastrar Cliente</button>
-            {% if session['user_role'] in ['master', 'admin'] %}
+            {% if session['user_role'] in ['master', 'admin'] and customers %}
             <button class="botao-reativar-cliente btn btn-primary"  data-bs-toggle="modal" data-bs-target="#modal-reativar-cliente">Reativar Cliente</button>
             {% endif %}
         </div>
@@ -118,7 +118,7 @@
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Funções</button>
                 <ul class="dropdown-menu dropdown-menu-dark">
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-cliente">Cadastrar Cliente</button></li>
-                    {% if session['user_role'] in ['master', 'admin'] %}
+                    {% if session['user_role'] in ['master', 'admin'] and customers  %}
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-reativar-cliente">Reativar Cliente</button></li>
                     {% endif %}
                 </ul>

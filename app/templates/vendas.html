@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block modal %}
+{% if users and products %}
 <section id="modal-registrar-venda" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -42,17 +43,23 @@
         </div>
     </div>
 </section>
+{% endif %}
 {% endblock %}
 
 {% block content %}
-<h1>{{ pagetitle }}</h1>
 
+<h1>{{ pagetitle }}</h1>
 <div id="container-todos">
+    <input type="hidden" id="users" name="users" value="{{ users }}">
+    <input type="hidden" id="products" name="products" value="{{ products }}">
+
     <div class="d-block w-100 mt-3">
+        {% if users and products %}
         <div id="botoes-vendas" class="float-start">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-registrar-venda">Registrar Venda</button>
         </div>
-        
+        {% endif %}
+
         <div class="input-group mb-2 w-50 float-end">
             <input id="barra-pesquisa" type="text" class="form-control w-50" placeholder="ID, Cliente, Vendedor">
             <button id="botao-pesquisa" type="button" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>

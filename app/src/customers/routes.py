@@ -58,7 +58,7 @@ def get_customers():
             'email' : str(customer.email),
             'address' : str(customer.address).title(),
         }
-        for customer in customers if customer.status
+        for customer in customers if customer.status and customer.id
     ]
 
     return jsonify(
@@ -213,6 +213,8 @@ def edit_customer():
             customer = Customer.query.filter_by(id=id).first()
             if not customer:
                 raise Exception('Cliente não cadastrado no banco de dados.')
+            elif not customer.id:
+                raise Exception('Esse cliente não pode ter seus dados alterados.')
             elif not customer.status:
                 raise Exception('Não é possível editar os dados de um cliente desativado.')
             
@@ -269,6 +271,8 @@ def disable_customer_status():
 
             if not customer:
                 raise Exception('Cliente ainda não registrado.')
+            elif not customer.id:
+                raise Exception('Esse cliente não pode ser desativado.')
             if not customer.status:
                 raise Exception('Cliente já está inativo.')
             

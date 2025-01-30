@@ -18,7 +18,9 @@ def render_page():
         pagetitle = 'Vendas',
         new_sale = new_sale,
         session = session,
-        messages = messages
+        messages = messages,
+        users = User.query.filter(((User.id != 0) & (User.role_id == 3))).count(),
+        products = Product.query.filter_by(status=1).count()
     )
 
 
@@ -149,7 +151,9 @@ def register_sale():
         discount = form.discount.data
         
         try:
-            if not Customer.query.filter_by(id=customer_id).first():
+            customer = Customer.query.filter_by(id=customer_id).first()
+
+            if not customer or not customer.status:
                 raise Exception('Cliente não encontrado no banco de dados.') 
             
             if not User.query.filter_by(id=user_id).first():

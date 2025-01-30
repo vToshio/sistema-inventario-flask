@@ -8,7 +8,7 @@ class ProductForm(Form):
     quantity = IntegerField('Quantidade', validators=[DataRequired()])
 
 class SaleForm(FlaskForm):
-    customer_id = IntegerField('ID do Cliente', validators=[DataRequired()])
+    customer_id = IntegerField('ID do Cliente', validators=[])
     salesman_id = SelectField( 'Vendedor', coerce=int, choices=[], validators=[DataRequired()])
     discount = SelectField('Desconto', coerce=int, choices=[(0, '0%'), (5, '5%'), (10, '10%'), (15, '15%')])
     products = FieldList(FormField(ProductForm), min_entries=1, validators=[DataRequired()])

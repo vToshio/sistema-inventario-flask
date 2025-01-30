@@ -55,7 +55,7 @@ const render_customers = (customers) => {
         `;
         table.appendChild(row);
         
-        if (!customer.status) {
+        if (!customer.status || !customer.id) {
             disable_button(`botao-editar-cliente-${customer.id}`);
             disable_button(`botao-desativar-status-${customer.id}`)
         }
