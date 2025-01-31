@@ -9,10 +9,11 @@ class User(db.Model):
 
     Atributos:
     - [*PK] id (int)
-    - role (string[6])
-    - name (string[30])
-    - username (string[20])
-    - email (string[100])
+    - role (str[6])
+    - name (str[30])
+    - status (int)
+    - username (str[20])
+    - email (str[100])
     - date_created (date)
     '''
     __tablename__ = 'users'
@@ -32,6 +33,13 @@ class User(db.Model):
         return f'<User: {self.username}/{self.id}>'
 
 class UserRole(db.Model):
+    '''
+    Model que define os cargos de associados à um Usuário.
+
+    Atributos: 
+    - [*PK] id (int)
+    - desc (str[20])
+    '''
     __tablename__ = 'roles'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True)
     desc = db.Column('desc', db.String(20), unique=True, nullable=False)
@@ -47,7 +55,8 @@ class Product(db.Model):
 
     Atributos:
     - [*PK] id (int)
-    - desc (string[100])
+    - desc (str[100])
+    - status (int)
     - quantity (int)
     - price (float[10,2])
     - [FK] category_id (int)
@@ -73,7 +82,7 @@ class ProductCategory(db.Model):
 
     Atributos:
     - [*PK] id (int)
-    - [*PK] desc (string[20])
+    - [*PK] desc (str[20])
     '''
     __tablename__ = 'product_categories'
     id = db.Column('id', db.Integer(), primary_key=True, autoincrement=True, nullable=False)
@@ -91,9 +100,11 @@ class Customer(db.Model):
 
     Atributos:
     - [*PK] id (int)
-    - name (string[30])
-    - email (string[50])
-    - address (string[100])
+    - name (str[30])
+    - status (int)
+    - cpf (str[11])
+    - email (str[50])
+    - address (str[100])
     '''
     __tablename__ = 'customers'   
     id = db.Column('id', db.Integer(), primary_key=True, nullable=False)

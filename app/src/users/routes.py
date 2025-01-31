@@ -10,6 +10,9 @@ users = Blueprint('users', __name__)
 @login_required
 @adm_required()
 def render_page():
+    '''
+    Rota que renderiza a página de Usuários por método GET.
+    '''
     users = [user for user in User.query.all() if user.id and user.status]
 
     return render_template(
@@ -31,6 +34,27 @@ def render_page():
 @login_required
 @adm_required()
 def get_users():
+    '''
+    Rota da API que retorna uma lista de usuários.
+
+    Query Args:
+    - page: página atual da lista
+    - per_page: quantas vendas estarão disponíveis por exibição de página
+
+    Retorno: 
+    - 'users': lista de dicionários contendo os dados dos usuários
+        'id' (int): ID do usuário
+        'name' (str): nome do usuário 
+        'username' (str): nome de acesso do sistema
+        'status' (int): estado de atividade do usuário 
+        'role_id' (int): ID do cargo do usuário
+        'role' (str): descrição do cargo do usuário
+        'email' (str): e-mail do usuário 
+        'date_created' (date): data de criação do usuário
+    - 'per_page': quantas usuários serão renderizados por página
+    - 'total': total de usuários
+    - 'pages': total de páginas
+    '''
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=10, type=int)
     
@@ -54,7 +78,8 @@ def get_users():
         'users' : users_list,
         'per_page' : users.per_page,
         'page' : users.page,
-        'total' : users.total
+        'total' : users.total,
+        'pages' : users.pages
     })
 
 
@@ -62,6 +87,23 @@ def get_users():
 @login_required
 @adm_required()
 def search_users():
+    '''
+    Rota da API que realiza a pesquisa de um usuário com base no seu ID, nome, nome de usuário, cargo ou e-mail.
+
+    Query Args:
+    - query (str): valor a ser pesquisado no banco de dados.
+
+    Retorno: 
+    - 'users': lista de dicionários contendo os dados dos usuários
+        'id' (int): ID do usuário
+        'name' (str): nome do usuário 
+        'username' (str): nome de acesso do sistema
+        'status' (int): estado de atividade do usuário 
+        'role_id' (int): ID do cargo do usuário
+        'role' (str): descrição do cargo do usuário
+        'email' (str): e-mail do usuário 
+        'date_created' (date): data de criação do usuário
+    '''
     searched = request.args.get('query', default='').strip().lower()
 
     try:
@@ -111,6 +153,17 @@ def search_users():
 @login_required
 @adm_required()
 def get_user(id: int):
+    '''
+    Rota dinâmica da API que pega os dados básicos de um único usuário.
+
+    Retorno (JSON):
+    - id (int): ID do usuário
+    - name (str): nome completo do usuário
+    - username (str): nome de acesso do sistema
+    - role_id (int): ID do cargo do usuário
+    - email (str): e-mail do usuário
+    '''
+
     user = User.query.filter_by(id=id).first()
 
     return jsonify({
@@ -126,6 +179,16 @@ def get_user(id: int):
 @login_required
 @adm_required()
 def new_user():
+    '''
+    Rota da API que registra um novo usuário por método POST.
+
+    Dados Registrados:
+    - name (str): nome completo do usuário
+    - username (str): nome de acesso do sistema
+    - role_id (int): ID do cargo do usuário
+    - passwd (str): senha do usuário, encriptada pelo Flask Bcrypt
+    - email (str): email do usuário
+    '''
     form = NewUserForm()
 
     if form.validate_on_submit():
@@ -171,6 +234,7 @@ def new_user():
 @login_required
 @adm_required()
 def change_password():
+    '''Rota da API que modifica a senha atual do usuário.'''
     form = ChangePasswdForm()
 
     if form.validate_on_submit():
@@ -209,6 +273,14 @@ def change_password():
 @login_required
 @adm_required()
 def edit_user():
+    '''
+    Rota que edita os dados de um usuário.
+
+    Dados Editados:
+    - name (str): nome completo do usuário
+    - username (str): nome de acesso do sistema
+    - email (str): email do usuário
+    '''
     form = EditUserForm()
 
     if form.validate_on_submit():
@@ -248,6 +320,10 @@ def edit_user():
 @login_required
 @adm_required()
 def edit_role():
+    '''
+    Rota da API que realiza a edição de um cargo de um usuário no sistema, por método POST.
+    Somente o usuário Master consegue realizar essa ação.
+    '''
     form = EditRoleForm()
 
     if form.validate_on_submit():
@@ -281,6 +357,9 @@ def edit_role():
 @login_required
 @adm_required()
 def enable_status():
+    '''
+    Rota da API que reabilita o estado de um usuário para ativo no sistema, utilizando o método POST
+    '''
     form = EnableStatusForm()
 
     if form.validate_on_submit():
@@ -310,6 +389,9 @@ def enable_status():
 @login_required
 @adm_required()
 def disable_status():
+    '''
+    Rota da API que torna um usuário inativo no sistema por meio do método POST.
+    '''
     form = DisableStatusForm()
 
     if form.validate_on_submit():

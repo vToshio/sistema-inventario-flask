@@ -12,6 +12,14 @@ def render_page():
     '''
     Métodos:
     - GET: renderiza a página Home do sistema.
+
+    Principais Argumentos Renderizados:
+    - qt_sales (int): valor que define a quantidade de vendas registradas.
+    - qt_customers (int): valor que define a quantidade de clientes registrados, não incluindo o 'Não Registrado'.
+    - qt_users (int): valor que define a quantidade de colaboradores que utilizam o sistema, não incluindo o Usuário 'Master'.
+    - qt_products (int): valor que define a quantidade de produtos em estoque.
+    - qt_sale_products (int): valor que define a quantidade de produtos vendidos.
+    - total (int): valor que define o valor total de dinheiro arrecadados por venda.
     '''
     user = User.query.filter_by(username=session['logged_user']).first()
     first_name = ''

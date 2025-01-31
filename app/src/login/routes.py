@@ -15,9 +15,7 @@ def root():
 @login.route('/sistema/login', methods=['GET'])
 def render_page():
     '''
-    Métodos:
-    - GET: renderiza a página Web com o formulário de Login
-    - POST: valida os dados fornecidos pelo formulário de Login 
+    Renderiza a página Web com o formulário de Login através do método GET.
     '''
     form = LoginForm()
 
@@ -30,6 +28,9 @@ def render_page():
 
 @login.route('/sistema/login/validate', methods=['POST'])
 def validate_login():
+    '''
+    Valida as informações de tentativa de acesso na página de Login, por método POST.
+    '''
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -59,8 +60,7 @@ def validate_login():
 @login_required
 def logout():
     '''
-    Métodos: 
-    - GET: finaliza a sessão do usuário logado no sistema.
+    Finaliza a sessão do usuário logado no sistema.
     '''
     session.pop('logged_in')
     session.pop('logged_user')

@@ -40,6 +40,11 @@ def get_customers():
     Retorno:
     - JSON contendo:
         - 'customers' (list): lista de clientes
+            - id: ID de identificação de cliente (int) 
+            - name: nome do Cliente (str)
+            - status: estado de atividade do cliente (int)
+            - cpf: cpf do cliente (str)
+            - email: e-mail do cliente (str)
         - 'page' (int): página atual
         - 'per_page' (int): quantidade de clientes por página
         - 'total' (int): quantidade total de clientes
@@ -122,6 +127,11 @@ def search_customers():
     Retorno:
     - JSON contendo:
         - 'customers' (list): lista de clientes identificados pela query string.
+            - id: ID de identificação de cliente (int) 
+            - name: nome do Cliente (str)
+            - status: estado de atividade do cliente (int)
+            - cpf: cpf do cliente (str)
+            - email: e-mail do cliente (str)
     '''
     searched  = request.args.get('query').strip()
 
@@ -234,6 +244,9 @@ def edit_customer():
 @adm_required(route='customers.render_page')
 @login_required
 def reactivate_customer():
+    '''
+    Rota da API que reativa um cliente com status inativo, por método POST.
+    '''
     form = ReactivateCustomerForm()
 
     if form.validate_on_submit():

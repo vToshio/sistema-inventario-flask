@@ -44,7 +44,10 @@ def generate_random_password(length:int=16) -> str:
 
 def flash_messages(form_errors: Dict[str, List[str]]):
     '''
-    Função auxiliar e exibe notificações de erro de preenchimento em um campo
+    Função auxiliar e exibe notificações de erro de preenchimento em um campo.
+    
+    Argumentos:
+    - form_errors (dict(str, list(str))): dicionário contendo os campos e uma lista dos erros apresentados pelo respectivo campo.
     '''
     for field, errors in form_errors.items():
         for e in errors:
@@ -65,6 +68,9 @@ def login_required(func):
 def adm_required(route:str='home.render_page'):
     '''
     Decorator que define uma rota que necessita que o usuário seja um administrador para receber uma request.
+
+    Argumentos:
+    - route (str): string que representa a rota a ser redirecionada caso o usuário não tenha a permissão de acesso
     '''
     def decorator(func):
         @wraps(func)

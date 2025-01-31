@@ -84,6 +84,13 @@ def get_products():
     Retorno:
     - JSON contendo:
         - 'products' (list): lista de dicionários com informações de um produto
+            - id (int): ID do produto
+            - desc (str): Descrição do Produto
+            - status (int): estado de disponibilidade do produto
+            - category_id (int): ID da categoria do produto
+            - category (str): descrição da categoria do produto
+            - quantity (int): quantidade de produtos no estoque
+            - price (float): preço do produto contendo 2 casas decimais
         - 'page' (int): página atual
         - 'per_page' (int): quantidade de produtos por página
         - 'total' (int): quantidade total de produtos
@@ -125,6 +132,8 @@ def get_categories():
     Retorno:
     - JSON contendo:
         - 'categories' (list): lista de categorias de produtos
+            - id (int): ID da categoria
+            - desc (str): descrição da categoria
     '''
     categories = ProductCategory.query.all()
 
@@ -151,6 +160,13 @@ def search_products():
     Retorno:
     - JSON contendo:
         - 'products' (list): lista de produtos identificados pela query string
+            - id (int): ID do produto
+            - desc (str): Descrição do Produto
+            - status (int): estado de disponibilidade do produto
+            - category_id (int): ID da categoria do produto
+            - category (str): descrição da categoria do produto
+            - quantity (int): quantidade de produtos no estoque
+            - price (float): preço do produto contendo 2 casas decimais
     '''
     searched = request.args.get('query', default='')
 
@@ -192,8 +208,6 @@ def search_products():
         flash(f'Erro ao realizar pesquisa de produto - {e}')
         return redirect(url_for('inventory.render_page'))
 
-
-from sqlalchemy import text
 @inventory.route('/api/products/new', methods=['POST'])
 @login_required
 def new_product():

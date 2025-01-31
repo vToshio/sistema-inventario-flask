@@ -12,6 +12,18 @@ from app.src.sales.routes import sales
 
 
 def create_app() -> Flask:
+    ''' 
+    Função que define as configurações da Aplicação
+
+    Funções:
+    - Importação dos Blueprints que definem as rotas da API de cada página do sistema.
+    - Inicialização das ferramentas csrf, bcrypt e da conexão com a database.
+    - Criação da database e de registros base de usuários, categorias, cargos e clientes.
+    
+    Retorno:
+    - app (Flask): instância da aplicação configurada.
+    '''
+
     app = Flask(__name__)
     app.register_blueprint(login)
     app.register_blueprint(home)

@@ -10,6 +10,10 @@ sales = Blueprint('sales', __name__)
 @sales.route('/sistema/home/vendas', methods=['GET'])
 @login_required
 def render_page():
+    '''
+    Renderiza a página de vendas por método GET.
+    '''
+
     new_sale = SaleForm()
     messages = get_flashed_messages()
 
@@ -27,6 +31,9 @@ def render_page():
 @sales.route('/sistema/home/vendas/<int:sale_id>', methods=['GET'])
 @login_required
 def download_pdf(sale_id: int):
+    '''
+    Rota que renderiza uma página HTML que contém os dados de uma venda (dados gerais, cliente, vendedor e produtos associados) e a transforma em um PDF, baixado automaticamente.
+    '''
     try:
         sale = Sale.query.filter_by(id=sale_id).first()
         salesman = User.query.join(Sale).filter(Sale.id==sale_id).first()
@@ -71,6 +78,25 @@ def download_pdf(sale_id: int):
 @sales.route('/api/sales', methods=['GET'])
 @login_required
 def get_sales():
+    '''
+    Rota da API que retorna uma lista de vendas.
+
+    Query Args:
+    - page: página atual da lista
+    - per_page: quantas vendas estarão disponíveis por exibição de página
+
+    Retorno: 
+    - 'sales': lista de vendas
+        - 'id' (int): ID de uma venda
+        - 'customer' (str): nome do cliente,
+        - 'salesman' (str): nome do vendedor,
+        - 'sell_date' (date): data da realização da venda,
+        - 'total' (float): valor total da venda
+    - 'page': página atual 
+    - 'per_page': quantas vendas serão renderizadas por página
+    - 'total': total de vendas
+    - 'pages': total de páginas
+    '''
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=10, type=int)
     
@@ -100,6 +126,17 @@ def get_sales():
 @sales.route('/api/sales/search', methods=['GET'])
 @login_required
 def search_sale():
+    '''
+    Retorno:
+    - JSON contendo:
+        - 'sales': lista de vendas
+            - 'id' (int): ID de uma venda
+            - 'customer' (str): nome do cliente,
+            - 'salesman' (str): nome do vendedor,
+            - 'sell_date' (date): data da realização da venda,
+            - 'total' (float): valor total da venda
+    '''
+
     searched = str(request.args.get('query')).lower().strip()
 
     try:
@@ -143,6 +180,12 @@ def search_sale():
 @sales.route('/api/sales/register-sale', methods=['POST'])
 @login_required
 def register_sale():
+    '''
+    Rota da API que registra uma venda por método POST.
+
+    Dados Registrados:
+    - customer_id (id)
+    '''
     form = SaleForm()
 
     if form.validate_on_submit():
