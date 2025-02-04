@@ -1,8 +1,11 @@
 let total;
+let customers_on_screen;
 let current_page = 1;
 const per_page = 10;
+const user_role = document.getElementById('user_role').value;
 const table = document.getElementById('body-tabela-clientes');
 
+/* HELPERS */
 const disable_button = async (button_id) => {
     document.getElementById(button_id).classList.add('disabled');
 }
@@ -72,6 +75,31 @@ const render_customers = (customers) => {
     });
 };
 
+const add_notification = (message) => {
+    const toasts_container = document.getElementById('toasts-container');
+
+    const toast = `
+        <div id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Sistema</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <p>${message}</p>
+            </div>
+        </div>
+    `
+    
+    toasts_container.innerHTML = toast;
+
+    Array.from(toasts_container.children).forEach(element => {
+        bootstrap.Toast.getOrCreateInstance(element).show();
+    });
+};
+
+
+/* Funções API */
+
 const load_customers = async (page) => {
     try {
         const response = await fetch(`/api/customers?page${current_page}&per_page=${per_page}`);
@@ -79,6 +107,7 @@ const load_customers = async (page) => {
         const customers = Array.from(data.customers);
 
         total = data.pages;
+        customers_on_screen = data.on_screen;
 
         if (customers.length === 0) {
             table.innerHTML = '<tr><td colspan="6">Nenhum cliente cadastrado ou ativo no sistema.</td></tr>';
@@ -111,8 +140,105 @@ const search_clients = async () => {
 };
 
 
+const fetch_api = async (route, method, json_data) => {
+    const response = await fetch(route,  {
+        method : method,
+        headers : {
+            'Content-Type' : 'application/json',
+            'X-CSRFToken' : json_data.csrf_token
+        },
+        body : JSON.stringify(json_data)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        localStorage.setItem('notification', data.message);
+        window.location.href = location.href;
+    } else {
+        add_notification(data.message);
+    }
+};
+
+const enable_status = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormReativarStatus');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/customers/enable-status/${formData.get('id-reativar-cliente')}`,
+        method = 'PATCH',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-reativar-cliente')
+        }
+    )
+
+    form.reset()
+};
+
+const disable_status = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormDesativarStatus');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/customers/disable-status/${formData.get('id-desativar-status')}`,
+        method = 'PATCH',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-desativar-status')
+        }
+    )
+
+    form.reset()
+};
+
+const edit_customer = (event) => {
+    event.preventDefault()
+
+    const form = document.getElementById('FormEditarCliente');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/customers/edit/${formData.get('id-editar-cliente')}`,
+        method = 'PUT',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-editar-cliente'),
+            name : formData.get('nome-editar-cliente'),
+            cpf : formData.get('cpf-editar-cliente'),
+            email : formData.get('email-editar-cliente'),
+            address : formData.get('endereco-editar-cliente')
+        }
+    )
+
+    form.reset()
+}
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     await load_customers();
+
+    const message = localStorage.getItem('notification');
+    if (message) {
+        add_notification(message);
+        localStorage.removeItem('notification');
+    }
+
+    // Restrição administrativa para reativar usuário
+    if (['admin', 'master'].includes(user_role)) {
+        document.getElementById('FormReativarStatus').addEventListener('submit', (event) => enable_status(event));
+    }
+
+    // Caso tenham usuários renderizados
+    if (customers_on_screen) {
+        // Desativar status
+        document.getElementById('FormDesativarStatus').addEventListener('submit', (event) => disable_status(event));
+        document.getElementById('FormEditarCliente').addEventListener('submit', (event) => edit_customer(event));
+    }
     
     /* Pesquisa */ 
     document.getElementById('botao-pesquisa').addEventListener('click', () => search_clients());

@@ -20,19 +20,16 @@ class ChangePasswdForm(FlaskForm):
     id = HiddenField(id='id-mudar-senha', name='id-mudar-senha', validators=[DataRequired()])
     new_password = PasswordField('Nova Senha', id='nova-senha-usuario', name='nova-senha-usuario', validators=[DataRequired(), Length(min=10, max=100)])
     confirm = PasswordField('Confirmar Nova Senha', id='confirmar-nova-senha', name='confirmar-nova-senha', validators=[DataRequired(), Length(min=10, max=100)])
-    submit = SubmitField('Mudar Senha')
 
 class EditUserForm(FlaskForm):
     id = HiddenField(id='id-editar-usuario', name='id-editar-usuario', validators=[DataRequired()])
     name = StringField('Nome Completo', id='nome-editar-usuario', name='nome-editar-usuario', validators=[DataRequired(), Length(max=50)])
     username = StringField('Nome de Acesso', id='username-editar-usuario', name='username-editar-usuario', validators=[DataRequired(), Length(max=20)])
     email = EmailField('E-mail', id='email-editar-usuario', name='email-editar-usuario', validators=[DataRequired(), Length(max=50)])
-    submit = SubmitField('Editar Usuário')
     
 class EditRoleForm(FlaskForm):
     id = HiddenField(id='id-editar-cargo', name='id-editar-cargo', validators=[DataRequired()])
     role_id = SelectField('Cargo', id='select-editar-cargo', name='select-editar-cargo', choices=[], validators=[DataRequired()])
-    submit = SubmitField('Editar Cargo')
 
     def __init__(self, *args, **kwargs):
         super(EditRoleForm, self).__init__(*args, **kwargs)
@@ -41,8 +38,6 @@ class EditRoleForm(FlaskForm):
 
 class EnableStatusForm(FlaskForm):
     id = IntegerField('ID do Usuário', id='id-ativar-status', name='id-ativar-status', validators=[DataRequired()])
-    submit = SubmitField('Reativar Usuário')
 
 class DisableStatusForm(FlaskForm):
-    id = HiddenField(id='id-desativar-status', name='id-desativar-status')
-    submit = SubmitField('Desativar Status')
+    id = HiddenField(id='id-desativar-status', name='id-desativar-status', validators=[DataRequired()])

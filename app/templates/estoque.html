@@ -24,7 +24,6 @@
 </section>
 
 {% if categories %}
-
 <!-- Modal Cadastrar Produto -->
 <section id="modal-cadastrar-produto" class="modal" tabindex="-1">
     <div class="modal-dialog">
@@ -55,14 +54,14 @@
             <div class="modal-header">
                 <h5>Reativar Produto</h5>
             </div>
-            <form action="{{ url_for('inventory.enable_product' )}}" method="post">
+            <form id="FormReativarStatus">
                 <div class="modal-body">
                     {{ enable_product.csrf_token }}
                     {{ enable_product.id(class='form-control', placeholder='ID do Produto') }}
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ enable_product.submit(class='btn btn-primary')}}
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Reativar Status</button>
                 </div>
             </form>
         </div>
@@ -80,11 +79,11 @@
                 <p>Tem certeza de que deseja deletar essa categoria? Ela será removida do banco de dados e não poderá ser recuperada.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('inventory.delete_category') }}" method="post">
+                <form id="FormDeletarCategoria">
                     {{ delete_category.csrf_token }}
                     {{ delete_category.id() }}
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ delete_category.submit(class='btn btn-danger') }}
+                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Deletar Categoria</button>
                 </form>
             </div>
         </div>
@@ -92,6 +91,7 @@
 </section>
 {% endif %}
 
+{% if products %}
 <!-- Adicionar Unidades dos Produtos -->
 <section id="modal-adicionar-unidades" class="modal" tabindex="-1">
     <div class="modal-dialog">
@@ -99,7 +99,7 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-adicionar-unidades"></h5>
             </div>
-            <form action="{{ url_for('inventory.add_units') }}" method="post">
+            <form id="FormAdicionarUnidades">
                 <div class="modal-body">
                     <div>
                         {{ add_units.csrf_token }}
@@ -109,7 +109,7 @@
                 </div> 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-                    {{ add_units.submit(class='btn btn-primary')}}
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Adicionar Unidades</button>
                 </div>
             </form>
         </div>
@@ -123,7 +123,7 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-editar-produto"></h5>
             </div>
-            <form action="{{ url_for('inventory.edit_product') }}" method="post">
+            <form id="FormEditarProduto">
                 <div class="modal-body">
                     {{ edit_product.csrf_token }}
                     
@@ -134,7 +134,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ edit_product.submit(class='btn btn-primary') }}
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Editar Produto</button>
                 </div>
             </form>
         </div>
@@ -152,23 +152,25 @@
                 <p>Deseja mesmo remover esse produto? Ele será deletado do banco de dados e não poderá ser recuperado.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('inventory.disable_product') }}" method="post">
+                <form id="FormDesativarStatus">
                     {{ disable_product.csrf_token }}
                     {{ disable_product.id() }}
                     
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ disable_product.submit(class='btn btn-danger') }}
+                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Desativar Produto</button>
                 </form>
             </div>
         </div>
     </div>
 </section>
+{% endif %}
 {% endblock %}
 
-{% block content %}
+{% block content %} 
 
 <div id="container-todos" class="w-100">
     <input type="hidden" id="user_role" value="{{ session['user_role'] }}">
+    <input type="hidden" id="categories" value="{{ categories }}">
     <h1>{{ pagetitle }}</h1> 
     
     <div class="d-block w-100 mt-3">
@@ -188,7 +190,7 @@
         {% if session['user_role'] in ['master', 'admin'] %}
         <div class="d-xl-none float-start">
             <div class="dropdown">
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Funções</button>
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-tools"></i></button>
                 <ul class="dropdown-menu dropdown-menu-dark">
                     {% if session['user_role'] in ['master', 'admin'] %} 
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-categoria">Cadastrar Categoria</button></li>
@@ -204,7 +206,7 @@
         {% endif %}
         
         <div id="pesquisa" class="input-group mb-2 w-50 float-end">
-            <input id="barra-pesquisa" class="form-control w-50" type="search" placeholder="Pesquisar Produto (id, descrição, categoria)">
+            <input id="barra-pesquisa" class="form-control w-50" type="search" placeholder="ID, Descrição, Categoria">
             <button id="botao-pesquisa" class="btn btn-outline-primary float-end" type="button"><i class="bi bi-search"></i></button>     
             <a href="{{ url_for('inventory.render_page') }}" class="btn btn-outline-secondary d-none d-sm-inline"><i class="bi bi-arrow-clockwise"></i></a>
         </div>

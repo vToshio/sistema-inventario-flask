@@ -1,11 +1,12 @@
 const user_role = document.getElementById('user_role').value;
 const logged_user = document.getElementById('logged_user').value;
 const table = document.getElementById('body-tabela-usuarios');
+let users_on_screen;
 let total;
 let current_page = 1;
 const per_page = 10;
  
-
+/* HELPERS */
 const disable_button = (button_id) => {
     document.getElementById(button_id).classList.add('disabled');
 };
@@ -121,7 +122,31 @@ const render_users = (users) => {
         select_id : 'select-editar-cargo',
         prefix : 'Editar Cargo'
     });
-}
+};
+
+const add_notification = (message) => {
+    const toasts_container = document.getElementById('toasts-container');
+
+    const toast = `
+        <div id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Sistema</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <p>${message}</p>
+            </div>
+        </div>
+    `
+    
+    toasts_container.innerHTML = toast;
+
+    Array.from(toasts_container.children).forEach(element => {
+        bootstrap.Toast.getOrCreateInstance(element).show();
+    });
+};
+
+/* Funções API */
 
 const load_users = async (page) => {
     try {
@@ -130,6 +155,7 @@ const load_users = async (page) => {
         const users = Array.from(data.users);
 
         total = data.pages;
+        users_on_screen = data.on_screen;
 
         if (users.length === 0) {
             table.innerHTML = '<tr><td colspan="7">Nenhum usuário cadastrado ou ativo no sistema.</td></tr>';
@@ -163,9 +189,148 @@ const search_users = async () => {
     }
 };
 
+const fetch_api = async(route, method, json_data) => {
+    const response = await fetch(route , {
+        method : method,
+        headers : {
+            'Content-Type' : 'application/json',
+            'X-CSRFToken': json_data.csrf_token
+        },
+        body : JSON.stringify(json_data)
+    })
+
+    const data = await response.json();
+
+    if (response.ok) {
+        localStorage.setItem('notification', data.message);
+        window.location.href = location.href;
+    } else {
+        add_notification(data.message);
+    }
+}
+
+const change_passwd = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormMudarSenha');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/users/change-password/${formData.get('id-mudar-senha')}`,
+        method = 'PATCH',
+        json_data = {
+            'csrf_token' : formData.get('csrf_token'),
+            'id' : formData.get('id-mudar-senha'),
+            'new_password' : formData.get('nova-senha-usuario'),
+            'confirm' : formData.get('confirmar-nova-senha'),
+        }
+    );
+
+    form.reset()
+}
+
+const edit_user = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormEditarUsuario');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/users/edit/${formData.get('id-editar-usuario')}`,
+        method = 'PUT',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-editar-usuario'),
+            name : formData.get('nome-editar-usuario'),
+            username : formData.get('username-editar-usuario'),
+            email : formData.get('email-editar-usuario')
+        }
+    );
+
+    form.reset();
+}; 
+
+const edit_role = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormEditarCargo');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/users/edit-role/${formData.get('id-editar-cargo')}`,
+        method = 'PATCH',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-editar-cargo'),
+            role_id : formData.get('select-editar-cargo')
+        }
+    )
+
+    form.reset()
+};
+
+const disable_status = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormDesativarStatus');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/users/disable-status/${formData.get('id-desativar-status')}`,
+        method = 'PATCH',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-desativar-status'),
+        }
+    )
+
+    form.reset()
+};
+
+const enable_status = (event) => {
+    event.preventDefault();
+
+    const form = document.getElementById('FormReativarStatus');
+    const formData = new FormData(form);
+
+    fetch_api(
+        route = `/api/users/enable-status/${formData.get('id-ativar-status')}`,
+        method = 'PATCH',
+        json_data = {
+            csrf_token : formData.get('csrf_token'),
+            id : formData.get('id-ativar-status'),
+        }
+    )
+
+    form.reset()
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     await load_users(current_page);
+
+    const message = localStorage.getItem('notification');
+    if (message) {
+        add_notification(message);
+        localStorage.removeItem('notification');
+    }
+
+    if (users_on_screen) {
+        // Form Mudar Senha
+        document.getElementById('FormMudarSenha').addEventListener('submit', (event) => change_passwd(event));
+        
+        // Form Editar Usuário
+        document.getElementById('FormEditarUsuario').addEventListener('submit', (event) => edit_user(event));
+
+        // Form Editar Cargo
+        document.getElementById('FormEditarCargo').addEventListener('submit', (event) => edit_role(event));
+
+        // Form Desativar Usuário
+        document.getElementById('FormDesativarStatus').addEventListener('submit', (event) => disable_status(event));    
+    
+    }
+    
+    // Form Reativar Usuário
+    document.getElementById('FormReativarStatus').addEventListener('submit', (event) => enable_status(event));
     
     /* Pesquisa */
     document.getElementById('botao-pesquisa').addEventListener('click', () => search_users());    

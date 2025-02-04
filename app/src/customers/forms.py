@@ -12,11 +12,9 @@ class NewCustomerForm(FlaskForm):
 
 class DisableCustomerStatusForm(FlaskForm):
     id = HiddenField(id='id-desativar-status', name='id-desativar-status', validators=[DataRequired()])
-    submit = SubmitField('Desativar Cliente')
 
 class ReactivateCustomerForm(FlaskForm):
     id = IntegerField('ID do Cliente', id='id-reativar-cliente', name='id-reativar-cliente', validators=[DataRequired()])
-    submit = SubmitField('Reativar Cliente')
 
 class EditCustomerForm(FlaskForm):
     id = HiddenField(id='id-editar-cliente', name='id-editar-cliente')
@@ -24,4 +22,3 @@ class EditCustomerForm(FlaskForm):
     cpf = StringField('CPF', id='cpf-editar-cliente', name='cpf-editar-cliente', validators=[DataRequired(), Length(max=11)])
     email = EmailField('Email', id='email-editar-cliente',name='email-editar-cliente', validators=[DataRequired(), Length(max=50)])
     address = StringField('Endereço', id='endereco-editar-cliente', name='endereco-editar-cliente', validators=[DataRequired(), Length(max=100)])
-    submit = SubmitField('Editar Cliente')

@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, jsonify, get_flashed_messages, flash, redirect, url_for, request, session
+from flask import Blueprint, render_template, abort, jsonify, get_flashed_messages, flash, redirect, url_for, request, session
 from app.helpers import login_required, adm_required, flash_messages, bcrypt
 from app.models import db, User
 from app.src.users.forms import * 
 from sqlalchemy import text
+from werkzeug.exceptions import HTTPException
 
 users = Blueprint('users', __name__)
 
@@ -42,7 +43,7 @@ def get_users():
     - per_page: quantas vendas estarão disponíveis por exibição de página
 
     Retorno: 
-    - 'users': lista de dicionários contendo os dados dos usuários
+    - 'users' (List): lista de dicionários contendo os dados dos usuários
         'id' (int): ID do usuário
         'name' (str): nome do usuário 
         'username' (str): nome de acesso do sistema
@@ -51,9 +52,10 @@ def get_users():
         'role' (str): descrição do cargo do usuário
         'email' (str): e-mail do usuário 
         'date_created' (date): data de criação do usuário
-    - 'per_page': quantas usuários serão renderizados por página
-    - 'total': total de usuários
-    - 'pages': total de páginas
+    - 'on_screen' (int): quantidade de usuários renderizados na página
+    - 'per_page' (int): quantas usuários serão renderizados por página
+    - 'total' (int): total de usuários
+    - 'pages' (int): total de páginas
     '''
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=10, type=int)
@@ -73,9 +75,11 @@ def get_users():
         }
         for user in users if user.status and user.id
     ]
+    users_list.reverse()
 
     return jsonify({
         'users' : users_list,
+        'on_screen' : len(users_list),
         'per_page' : users.per_page,
         'page' : users.page,
         'total' : users.total,
@@ -230,193 +234,190 @@ def new_user():
     return redirect(url_for('users.render_page'))
         
 
-@users.route('/api/users/mudar-senha', methods=['POST'])
+@users.route('/api/users/change-password/<int:id>', methods=['PATCH'])
 @login_required
 @adm_required()
-def change_password():
-    '''Rota da API que modifica a senha atual do usuário.'''
-    form = ChangePasswdForm()
+def change_password(id: int):
+    '''Rota da API que modifica a senha atual do usuário por método PATCH.'''
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do usuário deve ser do tipo inteiro.'}), 400
 
-    if form.validate_on_submit():
-        id = form.id.data
+    form = ChangePasswdForm(data=request.get_json())    
+
+    if form.validate():
         new_passwd = str(form.new_password.data).strip()
         confirm = str(form.confirm.data).strip()
 
         try:
             if not id:
-                raise Exception('Não é possível trocar a senha deste usuário.')
+                abort(403, 'Não é possível trocar a senha deste usuário.')
             if new_passwd != confirm:
-                raise Exception('Os campos de senha devem ser idênticos.')
+                abort(400, 'Os campos de senha devem ser idênticos.')
             elif len(new_passwd) < 10:
-                raise Exception('A senha deve possuir pelo menos 10 caracteres.')
+                abort(400, 'A senha deve possuir pelo menos 10 caracteres.')
         
             user = User.query.filter_by(id=id).first()
 
             if not user:
-                raise Exception(f'Usuário com o ID {id} não encontrado no banco de dados.')
+                abort(404, f'Usuário com o ID {id} não encontrado no banco de dados.')
             elif not user.status:
-                raise Exception(f'Não é possível mudar a senha do usuário "{user.username}" pois ele está desativado.')
+                abort(403, f'Não é possível mudar a senha do usuário "{user.username}" pois ele está desativado.')
             elif (user.roles.desc == 'admin' and (session['user_role'] == 'admin' and session['logged_user'] != user.username)):
-                raise Exception('Um usuário administrador não pode mudar a senha de outro usuário administrador.')
+                abort(403, 'Um usuário administrador não pode mudar a senha de outro usuário administrador.')
             
             user.password = bcrypt.generate_password_hash(new_passwd).decode('utf-8')
             db.session.commit()
-            flash('Senha alterada com sucesso!')
-        except Exception as e:
+            return jsonify({'message' : 'Senha alterada com sucesso!'}), 200
+        except HTTPException as e:
             db.session.rollback()
-            flash(f'Erro ao realizar mudança de senha - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('users.render_page'))
+            return jsonify({'message' : f'Erro ao realizar mudança de senha - {e.description}'}), e.code
+    return jsonify({'message' : 'Todos os campos precisam estar preenchidos.'}), 400
 
-@users.route('/api/users/editar', methods=['POST'])
+@users.route('/api/users/edit/<int:id>', methods=['PUT'])
 @login_required
 @adm_required()
-def edit_user():
+def edit_user(id: id):
     '''
-    Rota que edita os dados de um usuário.
+    Rota que edita os dados de um usuário por método PUT.
 
     Dados Editados:
     - name (str): nome completo do usuário
     - username (str): nome de acesso do sistema
     - email (str): email do usuário
     '''
-    form = EditUserForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message': 'o ID do usuário deve ser do tipo inteiro.'}), 400
+    
+    form = EditUserForm(data=request.get_json())
 
-    if form.validate_on_submit():
-        id = form.id.data
-        name = str(form.name.data).strip()
-        username = str(form.username.data).strip()
-        email = str(form.email.data).strip()
-
+    if form.validate():
         try:
             if not id:
-                raise Exception('Os dados desse usuário não podem ser editados.')
+                abort(403, 'Os dados desse usuário não podem ser editados.')
             
             user = User.query.filter_by(id=id).first()
+            old_username = user.username
 
             if not user:
-                raise Exception('Usuário não encontrado no banco de dados.')
+                abort(404, 'Usuário não encontrado no banco de dados.')
             elif not user.status:
-                raise Exception(f'Não é possível editar os dados do usuário "{user.username}" pois ele está desativado.')
+                abort(403, f'Não é possível editar os dados do usuário "{user.username}" pois ele está desativado.')
             elif (user.roles.desc == 'admin' and (session['user_role'] == 'admin' and session['logged_user'] != user.username)):
-                raise Exception('Um usuário administrador não pode editar os dados de outro administrador.')
+                abort(403, 'Um usuário administrador não pode editar os dados de outro administrador.')
 
             if session['logged_user'] == user.username:
-                session['logged_user'] = username
+                session['logged_user'] = form.username.data.strip()
             
-            user.name = name
-            user.username = username
-            user.email = email
+            user.name = str(form.name.data).lower().strip()
+            user.username = str(form.username.data).strip()
+            user.email = str(form.email.data).strip()
             db.session.commit()
-            flash(f'Usuário {username} alterado com sucesso!')
-        except Exception as e:
-            flash(f'Erro ao editar usuário - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('users.render_page'))
+            return jsonify({'message' : f'Usuário {old_username} alterado com sucesso! Atualizando os dados na tela...'}), 200
+        except HTTPException as e:
+            db.session.rollback()
+            return jsonify({'message' : f'Erro ao editar usuário - {e.description}'}), e.code 
+    return jsonify({'message' : 'Todos os campos devem estar preenchidos.'}), 400
 
-@users.route('/api/users/edit-role', methods=['POST'])
+@users.route('/api/users/edit-role/<int:id>', methods=['PATCH'])
 @login_required
 @adm_required()
-def edit_role():
+def edit_role(id: int):
     '''
-    Rota da API que realiza a edição de um cargo de um usuário no sistema, por método POST.
+    Rota da API que realiza a edição de um cargo de um usuário no sistema, por método PATCH.
     Somente o usuário Master consegue realizar essa ação.
     '''
-    form = EditRoleForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do usuário deve ser um valor inteiro.'}), 400
 
-    if form.validate_on_submit():
-        id = form.id.data
+    form = EditRoleForm(data=request.get_json())
+
+    if form.validate():
         role_id = form.role_id.data
 
         try:
-            if id == 1:
-                raise Exception('Esse usuário não pode ter o cargo alterado.')
+            if not id:
+                abort(403, 'Esse usuário não pode ter o cargo alterado.')
             elif session['user_role'] != 'master':
-                raise Exception('Somente o usuário Master pode realizar a alteração de cargos de usuários')
+                abort(403, 'Somente o usuário Master pode realizar a alteração de cargos de usuários')
             
             user = User.query.filter_by(id=id).first()
             
             if not user:
-                raise Exception('Usuário não encontrado no banco de dados.')
+                abort(404, 'Usuário não encontrado no banco de dados.')
             elif not int(role_id) in [role.id for role in UserRole.query.all()]:
-                raise Exception('Atribuição de cargo inexistente.')
+                abort('Atribuição de cargo inexistente.')
 
             user.role_id = role_id
             db.session.commit()
-            flash(f'Alteração de cargo do usuário "{user.username}" realizada com sucesso!')
-        except Exception as e:
+            return jsonify({'message' : f'Alteração de cargo do usuário "{user.username}" realizada com sucesso!'}), 200
+        except HTTPException as e:
             db.session.rollback()
-            flash(f'Erro ao realizar edição de cargos - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('users.render_page'))
+            return jsonify({'message' : f'Erro ao realizar edição de cargos - {e.description}'}), e.code
+    return jsonify({'message' : 'Todos os campos devem estar preenchidos.'}), 400
 
-@users.route('/api/users/enable-status', methods=['POST'])
+@users.route('/api/users/enable-status/<int:id>', methods=['PATCH'])
 @login_required
 @adm_required()
-def enable_status():
+def enable_status(id:int):
     '''
-    Rota da API que reabilita o estado de um usuário para ativo no sistema, utilizando o método POST
+    Rota da API que reabilita o estado de um usuário para ativo no sistema, utilizando o método PATCH
     '''
-    form = EnableStatusForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do usuário deve ser um valor inteiro.'}), 400
+    
+    form = EnableStatusForm(data=request.get_json())
 
-    if form.validate_on_submit():
-        id = form.id.data
-
+    if form.validate():
         try:
             user = User.query.filter_by(id=id).first()
 
             if not user:
-                raise Exception(f'Usuário não encontrado no banco de dados.')
+                abort(404, f'Usuário não encontrado no banco de dados.')
             elif user.status:
-                raise Exception(f'O usuário {user.username} já está ativo.')
+                abort(403, f'O usuário {user.username} já está ativo.')
             elif (user.roles.desc == 'admin' and (session['user_role'] == 'admin' and session['logged_user'] != user.username)):
-                raise Exception('Um usuário administrador não pode ativar outro usuário administrador.')
+                abort(403, 'Um usuário administrador não pode ativar outro usuário administrador.')
 
             user.status = 1
             db.session.commit()
-            flash(f'Usuário {user.username} reativado com sucesso!')
-        except Exception as e:
+            return jsonify({'message' : f'Usuário {user.username} reativado com sucesso!'}), 200
+        except HTTPException as e:
             db.session.rollback()
-            flash(f'Erro ao reativar usuário - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('users.render_page'))
+            return jsonify({'message' :f'Erro ao reativar usuário - {e.description}'}), e.code
+    return jsonify({'message' : 'Todos os campos devem estar preenchidos.'}), 400
 
-@users.route('/api/users/disable-status', methods=['POST'])
+@users.route('/api/users/disable-status/<int:id>', methods=['PATCH'])
 @login_required
 @adm_required()
-def disable_status():
+def disable_status(id:int):
     '''
     Rota da API que torna um usuário inativo no sistema por meio do método POST.
     '''
-    form = DisableStatusForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do usuário deve ser um valor inteiro.'}), 400
+    
+    form = DisableStatusForm(data=request.get_json())
 
     if form.validate_on_submit():
-        id = form.id.data
         try:
             if not id:
-                raise Exception(f'Esse usuário não pode ser desativado.')
+                abort(403, f'Esse usuário não pode ser desativado.')
 
             user = User.query.filter_by(id=id).first()
 
             if not user:
-                raise Exception('Usuário não encontrado no banco de dados.')
+                abort(404, 'Usuário não encontrado no banco de dados.')
             elif not user.status:
-                raise Exception(f'Usuário "{user.username}" já está desativado.')
+                abort(403, f'Usuário "{user.username}" já está desativado.')
             elif user.username == session['logged_user']:
-                raise Exception('Um usuário não pode desativar sua própria conta.')
+                abort(403, 'Um usuário não pode desativar sua própria conta.')
             elif (user.roles.desc == 'admin' and (session['user_role'] == 'admin' and session['logged_user'] != user.username)):
-                raise Exception('Um usuário administrador não pode desativar outro usuário administrador.')
+                abort(403, 'Um usuário administrador não pode desativar outro usuário administrador.')
 
             user.status = 0
             db.session.commit()
-            flash(f'Usuário "{user.username}" foi desativado com sucesso.')
-        except Exception as e:
+            return jsonify({'message' : f'Usuário "{user.username}" foi desativado com sucesso.'}), 200
+        except HTTPException as e:
             db.session.rollback()
-            flash(f'Erro ao deletar usuário - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('users.render_page'))
+            return jsonify({'message' : f'Erro ao deletar usuário - {e.description}'}), e.code
+    return jsonify({'message' : 'Todos os campos devem estar preenchidos.'}), 400

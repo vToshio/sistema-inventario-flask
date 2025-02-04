@@ -112,6 +112,7 @@ def get_sales():
         }
         for sale in sales.items
     ]
+    sale_list.reverse()
 
     return jsonify(
         {

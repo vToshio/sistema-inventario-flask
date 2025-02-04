@@ -10,7 +10,7 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-mudar-senha"></h5>
             </div>
-            <form action="{{ url_for('users.change_password') }}" method="post">
+            <form id="FormMudarSenha" >
                 {{ change_passwd.csrf_token }}
                 {{ change_passwd.id() }}
                 <div class="modal-body">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-                    {{ change_passwd.submit(class="btn btn-danger") }}
+                    <button class="btn btn-danger" type="submit" data-bs-dismiss="modal">Mudar Senha</button>
                 </div>
             </form>
         </div>
@@ -33,7 +33,7 @@
             <section class="modal-header">
                 <h5 id="titulo-modal-editar-usuario"></h5>
             </section>
-            <form action="{{ url_for('users.edit_user') }}" method="post">
+            <form id="FormEditarUsuario">
                 {{ edit_user.csrf_token }}
                 {{ edit_user.id() }}
                 <section class="modal-body">
@@ -43,7 +43,7 @@
                 </section>
                 <section class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ edit_user.submit(class="btn btn-primary")}}
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Editar Usuário</button>
                 </section>
             </form>
         </section>
@@ -61,12 +61,12 @@
                 <p>Ao desativar um usuário, ele não será visível na tabela de usuários. Você pode reativá-lo pela função "Reativar Usuário".</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ url_for('users.disable_status') }}" method="post">
+                <form id="FormDesativarStatus">
                     {{ disable_status.csrf_token }}
                     {{ disable_status.id() }}
 
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ disable_status.submit(class="btn btn-danger")}}
+                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Desativar Status</button>
                 </form>
             </div>
         </div>
@@ -80,7 +80,7 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-editar-cargo"></h5>
             </div>
-            <form action="{{ url_for('users.edit_role') }}" method="post">
+            <form id="FormEditarCargo">
                 {{ edit_role.csrf_token }}
                 {{ edit_role.id() }}
                 <div class="modal-body">
@@ -88,7 +88,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    {{ edit_role.submit(class='btn btn-primary') }}
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Editar Cargo</button>
                 </div>
             </form>
         </div>
@@ -103,14 +103,14 @@
             <div class="modal-header">
                 <h5 id="titulo-modal-reativar-usuario">Reativar Usuário</h5>
             </div>
-            <form action="{{ url_for('users.enable_status')}}" method="post">
+            <form id="FormReativarStatus">
                 <div class="modal-body">
                     {{ enable_status.csrf_token }}
                     {{ enable_status.id(class='form-control', placeholder='ID do usuário')}}
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-                    {{ enable_status.submit(class='btn btn-primary') }}
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Reativar Usuário</button>
                 </div>
             </form>
         </div>
@@ -165,7 +165,7 @@
 
         <!-- Mobile -->
         <div class="dropdown d-xl-none float-start">
-            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle">Funções</button>
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle"><i class="bi bi-tools"></i></button>
             <ul class="dropdown-menu dropdown-menu-dark">
                 <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-cadastrar-usuario">Cadastrar Usuário</button></li>
                 <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-reativar-usuario">Reativar Usuário</button></li>

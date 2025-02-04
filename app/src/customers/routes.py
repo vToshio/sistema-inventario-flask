@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, jsonify, flash, get_flashed_messages, redirect, url_for, get_flashed_messages, session, request
+from flask import Blueprint, render_template, jsonify, abort, flash, get_flashed_messages, redirect, url_for, get_flashed_messages, session, request
 from app.helpers import login_required, flash_messages, adm_required
+from werkzeug.exceptions import HTTPException
 from app.models import Customer, db
 from app.src.customers.forms import *
 from sqlalchemy import text
@@ -12,8 +13,6 @@ def render_page():
     '''
     Rota que renderiza a página de clientes.
     '''
-    customers = Customer.query.first()
-
     return render_template(
         'clientes.html',
         pagetitle='Clientes', 
@@ -46,6 +45,7 @@ def get_customers():
             - cpf: cpf do cliente (str)
             - email: e-mail do cliente (str)
         - 'page' (int): página atual
+        - 'on_screen' (int): quantidade de clientes renderizados na página
         - 'per_page' (int): quantidade de clientes por página
         - 'total' (int): quantidade total de clientes
         - 'pages' (int): quantidade total de páginas
@@ -65,10 +65,12 @@ def get_customers():
         }
         for customer in customers if customer.status and customer.id
     ]
+    customers_list.reverse()
 
     return jsonify(
         {
             'customers' : customers_list,
+            'on_screen' : len(customers_list),
             'page' : page,
             'per_page' : per_page,
             'total' : customers.total,
@@ -90,11 +92,11 @@ def get_customer(id: int):
     - JSON contendo:
         - name (str): nome completo do cliente
         - cpf (str): cpf do cliente
-        - status (bool): status do cliente
+        - status (int): status do cliente
         - email (str): email do cliente
         - address (str): endereço do cliente
     '''
-    if not isinstance(id, int):
+    if not isinstance(id, int) or id<0:
         flash('O ID deve ser um número inteiro para realizar uma pesquisa por ID.')
         return redirect(url_for('customers.render_page'))
     
@@ -127,11 +129,11 @@ def search_customers():
     Retorno:
     - JSON contendo:
         - 'customers' (list): lista de clientes identificados pela query string.
-            - id: ID de identificação de cliente (int) 
-            - name: nome do Cliente (str)
-            - status: estado de atividade do cliente (int)
-            - cpf: cpf do cliente (str)
-            - email: e-mail do cliente (str)
+            - id (int): ID de identificação de cliente (int) 
+            - name (str): nome do Cliente (str)
+            - status (int): estado de atividade do cliente (int)
+            - cpf (str): cpf do cliente (str)
+            - email (str): e-mail do cliente (str)
     '''
     searched  = request.args.get('query').strip()
 
@@ -204,9 +206,9 @@ def new_customer():
     return redirect(url_for('customers.render_page'))
 
 
-@customers.route('/api/customers/edit', methods=['POST'])
+@customers.route('/api/customers/edit/<int:id>', methods=['PUT'])
 @login_required
-def edit_customer():
+def edit_customer(id: int):
     '''
     Rota da API que altera os dados do cliente, através do método POST.
 
@@ -215,87 +217,90 @@ def edit_customer():
     - email (str): email de contato do cliente
     - address (str): endereço do cliente
     '''
-    form = EditCustomerForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do cliente deve ser do tipo inteiro positivo.'}), 400
 
-    if form.validate_on_submit():
+    form = EditCustomerForm(data=request.get_json())
+
+    if form.validate():
         id = form.id.data
         try:
             customer = Customer.query.filter_by(id=id).first()
             if not customer:
-                raise Exception('Cliente não cadastrado no banco de dados.')
+                raise abort(404, 'Cliente não cadastrado no banco de dados.')
             elif not customer.id:
-                raise Exception('Esse cliente não pode ter seus dados alterados.')
+                raise abort(403, 'Esse cliente não pode ter seus dados alterados.')
             elif not customer.status:
-                raise Exception('Não é possível editar os dados de um cliente desativado.')
+                raise abort(403, 'Não é possível editar os dados de um cliente desativado.')
             
             customer.name = str(form.name.data).strip().lower()
             customer.address = str(form.address.data).strip().lower()
             customer.email = form.email.data
             db.session.commit()
-            flash(f'Edição dos dados do cliente de ID {id} realizada com sucesso!')
-        except Exception as e:
+            return jsonify({'message' :f'Edição dos dados do cliente de ID {id} realizada com sucesso!'}), 200
+        except HTTPException as e:
             db.session.rollback()
-            flash(f'Erro na edição de dados do cliente - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('customers.render_page'))
+            return jsonify({'message' :f'Erro na edição de dados do cliente - {e.description}'}), e.code  
+    return jsonify({'message' : 'Todos os campos devem estar preenchidos.'}), 400
 
-@customers.route('/api/customers/reactivate', methods=['POST'])
+
+@customers.route('/api/customers/enable-status/<int:id>', methods=['PATCH'])
 @adm_required(route='customers.render_page')
 @login_required
-def reactivate_customer():
+def reactivate_customer(id: int):
     '''
-    Rota da API que reativa um cliente com status inativo, por método POST.
+    Rota da API que reativa um cliente com status inativo, por método PATCH.
     '''
-    form = ReactivateCustomerForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do cliente deve ser do tipo inteiro positivo.'}), 400
 
-    if form.validate_on_submit():
+    form = ReactivateCustomerForm(data=request.get_json())
+
+    if form.validate():
         try:
             id = form.id.data
             customer = Customer.query.filter_by(id=id).first()
 
             if not customer:
-                raise Exception(f'Usuário com o ID {id} ainda não cadastrado.')
+                raise abort(404, f'Usuário com o ID {id} ainda não cadastrado.')
             elif customer.status:
-                raise Exception(f'Usuário com o ID {id} já está ativo.')
+                raise abort(403, f'Usuário com o ID {id} já está ativo.')
 
             customer.status = 1
             db.session.commit()
-            flash(f'Cliente "{customer.name.title()}" reativado com sucesso!')
-        except Exception as e:
-            flash(f'Erro ao reativar cliente - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('customers.render_page'))
+            return jsonify({'message' : f'Cliente "{customer.name.title()}" reativado com sucesso!'}), 200
+        except HTTPException as e:
+            db.session.rollback()
+            return jsonify({'message' :f'Erro ao reativar cliente - {e.description}'}), e.code
+    return jsonify({'message' : 'Todos os campos devem estar preenchidos.'}), 400
 
-@customers.route('/api/customers/disable-status', methods=['POST'])
+@customers.route('/api/customers/disable-status/<int:id>', methods=['PATCH'])
 @login_required
-def disable_customer_status():
+def disable_customer_status(id:int):
     '''
-    Rota da API que desativa um cliente, por método POST.
+    Rota da API que desativa um cliente, por método PATCH.
     '''
-    form = DisableCustomerStatusForm()
+    if not isinstance(id, int) or id<0:
+        return jsonify({'message' : 'O ID do cliente deve ser do tipo inteiro positivo.'}), 400
+
+    form = DisableCustomerStatusForm(data=request.get_json())
 
     if form.validate_on_submit():
-        id = form.id.data
-
         try:
             customer = Customer.query.filter_by(id=id).first()
 
             if not customer:
-                raise Exception('Cliente ainda não registrado.')
+                abort(404, 'Cliente ainda não registrado.')
             elif not customer.id:
-                raise Exception('Esse cliente não pode ser desativado.')
+                abort(403, 'Esse cliente não pode ser desativado.')
             if not customer.status:
-                raise Exception('Cliente já está inativo.')
+                abort(403, 'Cliente já está inativo.')
             
             customer.status = 0
             db.session.commit()
-            flash(f'Cliente "{customer.name.title()}" desativado com sucesso!')    
-        except Exception as e:
+            return jsonify({'message' : f'Cliente "{customer.name.title()}" desativado com sucesso!'}), 200    
+        except HTTPException as e:
             db.session.rollback()
-            flash(f'Erro ao deletar cliente - {e}')
-    else:
-        flash_messages(form.errors)
-    return redirect(url_for('customers.render_page'))
+            return jsonify({'message' : f'Erro ao deletar cliente - {e.description}'}), e.code
+    return jsonify({'message' : 'Todos os campos devem ser preenchidos.'}), 400
 
