@@ -229,9 +229,12 @@ users.disable_status (JSON)        PATCH    /api/users/disable-status/<int:id>
 Endpoint                           Methods  Rule                                  
 ---------------------------------  -------  --------------------------------------       
 sales.render_page                  GET      /sistema/home/vendas                  
-sales.get_sales                    GET      /api/sales                            
+sales.get_sales (JSON)             GET      /api/sales                            
 sales.search_sale                  GET      /api/sales/search                                
 sales.download_pdf                 GET      /sistema/home/vendas/<int:sale_id>    
 sales.register_sale                POST     /api/sales/register-sale              
 ```
-Nenhum destes endpoints retorna informações em JSON.
+
+## Licença
+
+Este projeto está licenciado sob os termos da Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
