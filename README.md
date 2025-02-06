@@ -22,17 +22,18 @@ Neste sistema, é possível cadastrar Produtos, Usuários e Clientes, além de a
 ## Sumário
 
 1. [Instalação](#instalação)
-    a. [Instalação de Dependências](#1-instalação-das-dependências)
-    b. [Instalação da Aplicação](#2-instalação-da-aplicação)
+    - [Instalação de Dependências](#1-instalação-das-dependências)
+    - [Instalação da Aplicação](#2-instalação-da-aplicação)
 2. [Estrutura do Projeto](#estrutura-do-projeto)
-    a. [Modelagem do Banco de Dados](#modelagem-do-banco-de-dados)
-    b. [Estrutura de Arquivos](#estrutura-de-arquivos)
+    - [Modelagem do Banco de Dados](#modelagem-do-banco-de-dados)
+    - [Estrutura de Arquivos](#estrutura-de-arquivos)
 3. [Rotas da API](#rotas-da-api)
-    a. [Página Home e Login](#página-home-e-login)
-    b. [Inventário](#inventário-produtos-e-categorias)
-    c. [Clientes](#clientes)
-    d. [Usuários](#usuários)
-    e. [Vendas](#vendas)
+    - [Página Home e Login](#página-home-e-login)
+    - [Inventário](#inventário-produtos-e-categorias)
+    - [Clientes](#clientes)
+    - [Usuários](#usuários)
+    - [Vendas](#vendas)
+4. [Licença](#licença)
 
 ## Instalação
 
