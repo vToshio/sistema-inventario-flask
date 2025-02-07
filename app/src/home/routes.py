@@ -44,7 +44,7 @@ def render_page():
         qt_sales = sales,
         qt_customers = customers,
         qt_users = users-1 if users else 0,
-        qt_products = products[0] if products is not None else 0,
+        qt_products = products[0] if products[0] is not None else 0,
         qt_sale_products = sale_products[0] if sale_products[0] is not None else 0  ,
         total = floor(total[0]) if total[0] is not None else 0
     )

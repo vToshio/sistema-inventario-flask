@@ -21,19 +21,23 @@ Neste sistema, é possível cadastrar Produtos, Usuários e Clientes, além de a
 
 ## Sumário
 
-1. [Instalação](#instalação)
+1. [Funcionamento do Sistema](#funcionamento-do-sistema)
+    - [Hierarquia de Usuários](#hierarquia-de-usuários)
+    - [Permissões](#permissões)
+    - [Observações](#observações)
+2. [Instalação](#instalação)
     - [Instalação de Dependências](#1-instalação-das-dependências)
     - [Instalação da Aplicação](#2-instalação-da-aplicação)
-2. [Estrutura do Projeto](#estrutura-do-projeto)
+3. [Estrutura do Projeto](#estrutura-do-projeto)
     - [Modelagem do Banco de Dados](#modelagem-do-banco-de-dados)
     - [Estrutura de Arquivos](#estrutura-de-arquivos)
-3. [Rotas da API](#rotas-da-api)
+4. [Rotas da API](#rotas-da-api)
     - [Página Home e Login](#página-home-e-login)
     - [Inventário](#inventário-produtos-e-categorias)
     - [Clientes](#clientes)
     - [Usuários](#usuários)
     - [Vendas](#vendas)
-4. [Licença](#licença)
+5. [Licença](#licença)
 
 ## Instalação
 
@@ -69,6 +73,34 @@ Executando o Sistema
 ```bash
 python3 run.py
 ```
+
+
+## Funcionamento do Sistema
+
+### Hierarquia de Usuários
+
+O sistema opera com base em uma hierarquia de usuários, dividida em três níveis de acesso:
+
+- **master:** usuário único e com controle total do sistema.
+- **admin:** destinado à usuários com cargo administrativo.
+- **user:** destinado à usuários comuns do sistema.
+
+O usuário **master** é gerado automaticamente na primeira inicialização do sistema, e sua senha é exibida no terminal.
+
+
+### Permissões
+
+| Cargos | Categorias | Produtos | Clientes | Vendas | Usuários | 
+|--------|------------|----------|----------|--------|----------|
+| User   | Sem Permissões |Adicionar Unidades |  Cadastrar, editar e desativar | Registrar e baixar registros | Sem permissões |
+| Admin  | Cadastrar e Deletar | Adicionar unidades, cadastrar, editar dados, desativar e reativar | Cadastrar, editar, desativar e reativar | Registrar e baixar registros | Cadastrar, mudar senha, editar dados, desativar e reativar |
+| Master | Cadastrar e Deletar | Adicionar unidades, cadastrar, editar dados, desativar e reativar | Cadastrar, editar, desativar e reativar | Registrar e baixar registros | Cadastrar, mudar senha, editar dados, editar cargo desativar e reativar |
+
+### Observações
+
+- Apenas **Users** podem ser vinculados a um **registro de venda**.
+- O **Master** tem todas as permissões de um **Admin**, mas com a capacidade adicional de alterar cargos de usuários.
+- O **Master** não pode ter nenhum de seus dados alterados, nem ser deletado ou desativado.
 
 ## Estrutura do Projeto
 
